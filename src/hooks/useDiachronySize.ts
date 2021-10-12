@@ -7,7 +7,7 @@ export interface WithUseDiachronySize {
 }
 
 export function injectUseDiachronySize<T>(
-  rxImmer: RxImmer<T> & Partial<WithUseDiachronySize>,
+  rxImmer: RxImmer<T> & Partial<WithUseDiachronySize>
 ) {
   rxImmer.useDiachronySize = function () {
     const [size, setSize] = useState(this.size$?.getValue() ?? 0);

@@ -25,7 +25,7 @@ export type RxImmerWithHooks<T> = RxImmer<T> &
 
 export function useRxImmer<T extends Objectish>(
   initial: T,
-  config?: DeepPartial<Config>,
+  config?: DeepPartial<Config>
 ): RxImmerWithHooks<T> {
   const ref = useRef<RxImmer<T>>();
   if (!ref.current) {

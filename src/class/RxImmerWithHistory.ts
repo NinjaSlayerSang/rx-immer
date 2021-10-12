@@ -17,7 +17,7 @@ export interface IWithHistory {
 
 export function generateWithHistory(
   Cls: typeof RxImmerBase,
-  config: HistoryConfig,
+  config: HistoryConfig
 ): any {
   return class RxImmerWithHistory<T extends Objectish>
     extends Cls<T>
@@ -39,9 +39,9 @@ export function generateWithHistory(
         .pipe(
           buffer(
             this.historyBufferPool$.pipe(
-              debounceTime(this.historyBufferDebounce),
-            ),
-          ),
+              debounceTime(this.historyBufferDebounce)
+            )
+          )
         )
         .subscribe((records) => {
           this.record(records);

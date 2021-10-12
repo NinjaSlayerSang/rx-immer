@@ -9,14 +9,14 @@ export function useRxImmerBind<T>(rxImmer: RxImmer<T>): Immutable<T>;
 
 export function useRxImmerBind<T, V = any>(
   rxImmer: RxImmer<T>,
-  listenPath: Path,
+  listenPath: Path
 ): Immutable<V> | undefined;
 
 export function useRxImmerBind<T>(rxImmer: RxImmer<T>, listenPath?: Path) {
   const [value, setValue] = useState(
     listenPath === undefined
       ? rxImmer.value()
-      : get(rxImmer.value(), listenPath),
+      : get(rxImmer.value(), listenPath)
   );
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export interface WithUseBind<T> {
 }
 
 export function injectUseBind<T>(
-  rxImmer: RxImmer<T> & Partial<WithUseBind<T>>,
+  rxImmer: RxImmer<T> & Partial<WithUseBind<T>>
 ) {
   rxImmer.useBind = function useBind(listenPath?: Path) {
     return useRxImmerBind(this, listenPath!);

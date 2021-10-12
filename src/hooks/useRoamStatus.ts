@@ -7,11 +7,11 @@ export interface WithUseRoamStatus {
 }
 
 export function injectUseRoamStatus<T>(
-  rxImmer: RxImmer<T> & Partial<WithUseRoamStatus>,
+  rxImmer: RxImmer<T> & Partial<WithUseRoamStatus>
 ) {
   rxImmer.useRoamStatus = function () {
     const [roamStatus, setRoamStatus] = useState<[number, number]>(
-      this.roamStatus$?.getValue() ?? [0, 0],
+      this.roamStatus$?.getValue() ?? [0, 0]
     );
 
     useEffect(() => {

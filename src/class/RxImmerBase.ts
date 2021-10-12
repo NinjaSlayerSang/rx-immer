@@ -18,7 +18,7 @@ export interface IRxImmerBase<T extends Objectish> {
   commit(recipe: (draft: Draft<T>) => void): void;
   commit<V extends Objectish>(
     recipe: (draft: Draft<V>) => void,
-    targetPath: Path,
+    targetPath: Path
   ): void;
 
   destroy(): void;
@@ -47,7 +47,7 @@ export class RxImmerBase<T extends Objectish> implements IRxImmerBase<T> {
     const checkPath = isContained(listenPath);
     return this.patchesTuple$.pipe(
       filter((patches) => patches[0].some((patch) => checkPath(patch.path))),
-      map(() => get(this.store, listenPath)),
+      map(() => get(this.store, listenPath))
     );
   }
 
@@ -64,7 +64,7 @@ export class RxImmerBase<T extends Objectish> implements IRxImmerBase<T> {
 
     [this.store, ...record] = produceWithPatches(
       this.store as T,
-      optionalRecipe,
+      optionalRecipe
     ) as [Immutable<T>, Patches, Patches];
 
     if (isCommitValid(record)) {

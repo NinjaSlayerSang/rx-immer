@@ -51,9 +51,9 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
         observe,
         this.timeRange$.pipe(
           map(() =>
-            listenPath === undefined ? this.store : get(this.store, listenPath),
-          ),
-        ),
+            listenPath === undefined ? this.store : get(this.store, listenPath)
+          )
+        )
       );
     }
 
