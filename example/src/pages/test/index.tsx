@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { FieldData } from 'rc-field-form/lib/interface';
-import { Diachrony, RxImmerWithHooks, useRxImmer } from '../../rx-immer';
+import { Diachrony, RxImmerWithHooks, useRxImmer } from 'rx-immer';
 import TestCard from './components/TestCard';
 import { ListItem } from './components/TableEditor';
 import { TreeData } from './components/TreeEditor';

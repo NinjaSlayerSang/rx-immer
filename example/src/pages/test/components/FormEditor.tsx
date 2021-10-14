@@ -13,7 +13,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import { FieldData } from 'rc-field-form/lib/interface';
 import { mock } from 'mockjs';
-import { Path, RxImmerWithHooks } from '../../../rx-immer';
+import { Path, RxImmerWithHooks } from 'rx-immer';
 import { PropsWithStore } from '..';
 import { updateDeep } from '../utils';
 
@@ -29,7 +29,7 @@ function useFormWithRxImmer<T>(rxImmer: RxImmerWithHooks<T>, path?: Path) {
   const fields = rxImmer.useBind<FieldData[]>(path!) as FieldData[];
   const onFieldsChange = (
     changedFields: FieldData[],
-    allFields: FieldData[]
+    allFields: FieldData[],
   ) => {
     rxImmer.commit<FieldData[]>((draft) => {
       updateDeep(draft, allFields);

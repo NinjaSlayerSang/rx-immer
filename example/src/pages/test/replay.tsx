@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react';
 import { Modal } from 'antd';
-import { useRxImmer } from '../../rx-immer';
+import { useRxImmer } from 'rx-immer';
 import ReplaySlider from './components/ReplaySlider';
 import Editor from './components/Editor';
 import { INITIAL_STORE } from './const';
@@ -33,7 +33,7 @@ const Replay: FunctionComponent<ReplayProps> = (props) => {
         setVisible(true);
       },
     }),
-    [store]
+    [store],
   );
 
   return (
