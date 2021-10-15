@@ -1,4 +1,5 @@
 # rx-immer
+
 基于不可变数据(immutable)与响应式数据流(observable)的JavaScript应用状态轻量级管理框架。
 
 [TOC]
@@ -18,6 +19,12 @@ immer能够保持JavaScript可序列化对象的不可变性，当嵌套的对�
 
 rx-immer具有非常简易实用的基础功能API，使用者不需要关注任何额外的细节或者编程模式，创建、读取、修改、销毁，均可以一个接口一行代码轻松搞定，灵活便捷。
 
+### 在项目中引入
+
+```bash
+npm install rx-immer --save
+```
+
 ### 创建实例
 
 ```javascript
@@ -26,7 +33,7 @@ import { factory } from 'rx-immer';
 const store = new (factory())({});
 ```
 
-rx-immer使用**工厂模式**创建实例，`factory`函数为类工厂，可接受配置项参数，返回被配置的类，即可使用`new`关键字构建实例。构造函数接受一个**可序列化**的对象（例如Object、Array、Map、Set，可多层嵌套）参数，作为`store`实例的初始状态值。
+rx-immer使用**工厂模式**创建实例，`factory`函数为类工厂，可接受配置项参数，返回被配置的类，即可使用`new`关键字构建实例。构造函数接受一个**可序列化**的对象（例如Object、Array、Map、Set，可多层嵌套）参数，作为实例的初始状态值。
 
 在*TypeScript*中，`factory<T>`作为泛型函数，能够显式地指定类型，指示状态值的类型信息：
 
@@ -39,12 +46,12 @@ interface IState {
   status: boolean;
 }
 
-const CustomRxImmer = factory<IState>();
+const CustomRxImmer = factory<IState>(); // 不传入配置项参数，使用默认配置
 
 const store = new CustomRxImmer({ id: 0, name: 'abc', status: true });
 ```
 
-在*React*中使用时，可以利用内置的自定义hooks更简单地创建实例，将在后面的章节中介绍。
+在*React*中使用时，可以利用内置的自定义hooks更简单地创建实例。具体用法将在后面的章节中介绍。
 
 ### 监听状态改变
 
@@ -75,7 +82,15 @@ const subscription = store.observe(['a', 0, 'b', 'c']).subscribe((c) => {
 
 同样，在*TypeScript*中，`observe<T>`作为泛型方法，可以接受一个类型参数，指示监听值的类型信息。因为利用路径获得值具有动态性，所以TypeScript编译器无法自动推断监听值的准确类型，需要手动指定。
 
-在*React*中使用时，可以利用内置的自定义hooks更简单地绑定状态到组件的state，将在后面的章节中介绍。
+```typescript
+const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
+  console.log(c); // TypeScript编译器此时能知道c的类型为number
+});
+```
+
+**注意：**在监听使用结束后，需要执行`subscription.unsubscribe()`解除监听以释放资源。
+
+在*React*中使用时，可以利用内置的自定义hooks更简单地绑定状态到组件的state，并且，在React组件卸载时，绑定的监听也会自动解除。具体用法将在后面的章节中介绍。
 
 ### 修改状态
 
@@ -108,9 +123,20 @@ store.commit((b) => {
 }, 'a[0].b');
 ```
 
+但是，只要变量指向的是引用类型，依然可以捕获修改：
+
+```javascript
+store.commit((a0) => {
+  const { b } = a0;
+  b.c = 1; // 正确！因为变量b指向一个引用对象
+}, 'a[0]');
+```
+
+一般规律是，在编写*recipe*函数体时，如果需要对代理对象内部属性解引用，请使用`const`关键字以保证变量的不可变性。并且，如果项目使用*eslint*作为代码校验工具，可开启*no-param-reassign*规则禁止对函数参数再赋值，消除不恰当的代码可能造成的问题。
+
 同样，在*TypeScript*中，`commit<T>`作为泛型方法，可以接受一个类型参数，指示修改目标的类型信息。
 
-*高级：请保证recipe函数同步返回时便完成本次提交的所有修改，传入recipe函数的代理state**不应该**被**闭包**捕获，因为在recipe函数返回之后，对于state的任何修改都不再会生效。例如state被闭包捕获传入某个异步回调中，在异步调用发生时，recipe函数已经执行完毕，修改事务已经提交，此时对于state的修改将不再有效果。*
+*高级：请保证recipe函数同步返回时便完成本次提交的所有修改，传入recipe函数的代理state**不应该**被**闭包**捕获，因为在recipe函数返回之后，对于state的任何修改都**不再会生效**。例如state被闭包捕获传入某个异步回调中，在异步调用发生时，recipe函数已经执行完毕，修改事务已经提交，此时对于state的修改将不再有效果。*
 
 ```javascript
 api().then((res) => {
@@ -129,10 +155,10 @@ store.commit((state) => {
 ### 销毁实例
 
 ```javascript
-store.destroy()
+store.destroy();
 ```
 
-清理所有监听事件。
+清理实例内部监听事件链，如果手动创建实例，请保证在实例生命周期结束时显示调用`destroy`方法。
 
 ## 在React中使用
 
@@ -144,7 +170,29 @@ store.destroy()
 const store = useRxImmer({});
 ```
 
-内部使用了*useRef*来创建并挂载实例，并且在React组件卸载时自动调用`store.destroy()`清理实例。
+内部使用了*useRef*来创建并挂载实例，并且在React组件卸载时自动调用实例的`destroy`方法。
+
+在TypeScript中，`useRxImmer<T>`作为泛型函数，能够显式地指定类型，指示状态值的类型信息。
+并且，`useRxImmer`接受第一个参数，作为状态的初始值，可选地接受第二个参数*config*，作为实例创建的配置项。
+
+```typescript
+import { useRxImmer } from 'rx-immer';
+
+interface IState {
+  id: number;
+  name: string;
+  status: boolean;
+}
+
+// 在React组件中...
+
+const store = useRxImmer<IState>(
+    { id: 0, name: 'abc', status: true }, // 初始状态
+    { history: { capacity: 1000 } }, // 配置项
+  );
+```
+
+配置项详情将在后面的章节中介绍。
 
 ### 将状态绑定到组件
 
@@ -153,14 +201,78 @@ const state = store.useBind();
 const c = store.useBind('a[0].b.c');
 ```
 
-内部使用*useState*将rx-immer实例状态与组件状态相绑定，当实例state发生改变，相关的所有组件将重新渲染（且只有改动影响到的组件会发生重新渲染）。
+内部使用*useState*将rx-immer实例状态与组件状态相绑定，当实例state发生改变，相关的所有组件将重新渲染（且只有改动影响到的组件会发生重新渲染）。组件卸载后，绑定的监听将会自动解除。
 
-*注意：useBind等注入到实例方法中的自定义hooks会通过Mixin模式依据配置动态注入，注入过程发生在useRxImmer()中，因此，只有通过useRxImmer创建的实例会自动含有内联的自定义hooks，如果通过其他方式创建，则需要手动注入hooks。*
+同样，在TypeScript中，`useBind<T>`作为实例的泛型方法，能够显式地指定类型，指示监听目标的类型信息。
+
+```typescript
+const c = store.useBind<number>('a[0].b.c');
+// TypeScript编译器此时能知道c的类型为number
+```
+
+*注意：useBind等注入到实例方法中的自定义hooks会通过Mixin模式依据配置动态注入，注入过程发生在useRxImmer中。因此，只有通过useRxImmer创建的实例会自动含有内联的自定义hooks，如果通过其他方式创建，则需要手动注入hooks：*
+
+```javascript
+import { injectUseBind } from 'rx-immer';
+
+// 不通过useRxImmer创建实例store...
+
+const storeWithUseBind = injectUseBind(store);
+```
 
 ## 扩展功能
 
-todo
+rx-immer使用**高阶类(HOC)**实现**继承派生模式**以扩展功能，并且使用**工厂模式**在创建实例时**动态地**派生子类以加载扩展的功能。采用这种模式能够提升项目的扩展性，也方便使用者开发自己的高阶类自定义扩展功能。
+
+项目内置了一些扩展功能，通过配置项可以加载这些功能并使用。
+
+### 操作栈
+
+rx-immer默认配置开启操作栈，能够实现状态修改的撤销/重做等时间漫游功能：
+
+```javascript
+const [undos, redos] = store.getRoamStatus?.();
+// 获取操作栈信息: [当前可撤销步骤数, 当前可重做步骤数]
+
+store.revert?.(); // 撤销
+
+store.recover?.(); // 重做
+```
+
+> - 为什么要使用`?.`操作符？
+> 扩展功能是根据配置项动态加载的，当相关配置项指定为关闭时，扩展功能不会加载，此时实例相关功能的方法是空值。对于TypeScript编译器来说，因为配置项具有动态性，是无法准确推断实例的具体派生类型，此时将扩展功能的方法指定为可空类型是一个安全的实践。
+
+在*React*中，可以利用扩展功能附带的自定义hooks将操作栈状态信息绑定到组件state中：
+
+```javascript
+const [undos, redos] = store.useRoamStatus?.() ?? [0, 0];
+```
+
+### 历史归档及场景还原
+
+*文档待补充*
 
 ## 配置
 
-todo
+```typescript
+// 默认配置及配置详解
+interface Config {
+  history: // 操作栈功能配置，设置为false时关闭操作栈功能
+    | {
+        capacity: number; // 操作栈最大容量
+        bufferDebounce: number; // 合并短时间多个状态变更操作的时间阈值
+      }
+    | false;
+  diachrony: boolean; // 是否开启历史记录归档功能
+  replay: boolean; // 是否开启场景还原模式
+}
+
+const defaultConfig: Config = {
+  history: { // 默认开启操作栈功能
+    capacity: Number.POSITIVE_INFINITY, // 默认操作栈容量无限制
+    bufferDebounce: 0, // 默认时间阈值为0，即不合并短时间多个操作
+  },
+  diachrony: false, // 默认关闭历史记录归档功能
+  replay: false, // 默认关闭场景还原模式
+};
+```
