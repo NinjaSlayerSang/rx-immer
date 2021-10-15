@@ -18,7 +18,7 @@ immer能够保持JavaScript可序列化对象的不可变性，当嵌套的对�
 
 rx-immer具有非常简易实用的基础功能API，使用者不需要关注任何额外的细节或者编程模式，创建、读取、修改、销毁，均可以一个接口一行代码轻松搞定，灵活便捷。
 
-- ### 创建实例
+### 创建实例
 
 ```javascript
 import { factory } from 'rx-immer';
@@ -46,7 +46,7 @@ const store = new CustomRxImmer({ id: 0, name: 'abc', status: true });
 
 在*React*中使用时，可以利用内置的自定义hooks更简单地创建实例，将在后面的章节中介绍。
 
-- ### 监听状态改变
+### 监听状态改变
 
 ```javascript
 const subscription = store.observe().subscribe((state) => {
@@ -77,7 +77,7 @@ const subscription = store.observe(['a', 0, 'b', 'c']).subscribe((c) => {
 
 在*React*中使用时，可以利用内置的自定义hooks更简单地绑定状态到组件的state，将在后面的章节中介绍。
 
-- ### 修改状态
+### 修改状态
 
 ```javascript
 store.commit((state) => {
@@ -126,7 +126,7 @@ store.commit((state) => {
 }); // 错误！state被传入异步回调中，修改无法生效！
 ```
 
-- ### 销毁实例
+### 销毁实例
 
 ```javascript
 store.destroy()
@@ -138,7 +138,7 @@ store.destroy()
 
 框架内置了自定义hooks方便在React项目中更加便捷地使用rx-immer：
 
-- ### 创建实例
+### 创建实例
 
 ```javascript
 const store = useRxImmer({});
@@ -146,7 +146,7 @@ const store = useRxImmer({});
 
 内部使用了*useRef*来创建并挂载实例，并且在React组件卸载时自动调用`store.destroy()`清理实例。
 
-- ### 将状态绑定到组件
+### 将状态绑定到组件
 
 ```javascript
 const state = store.useBind();
@@ -157,10 +157,10 @@ const c = store.useBind('a[0].b.c');
 
 *注意：useBind等注入到实例方法中的自定义hooks会通过Mixin模式依据配置动态注入，注入过程发生在useRxImmer()中，因此，只有通过useRxImmer创建的实例会自动含有内联的自定义hooks，如果通过其他方式创建，则需要手动注入hooks。*
 
-## 配置
+## 扩展功能
 
 todo
 
-## 扩展功能
+## 配置
 
 todo
