@@ -1,4 +1,4 @@
-# rx-immer <!-- omit in toc -->
+# rx-immer
 
 基于不可变数据(immutable)与响应式数据流(observable)的JavaScript应用状态轻量级管理框架。
 
