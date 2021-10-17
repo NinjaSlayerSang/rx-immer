@@ -27,7 +27,7 @@ const ReplaySlider: FunctionComponent<ReplaySliderProps & PropsWithStore> = (
   useEffect(() => {
     const subscription = store.timeRange$?.subscribe((value) => {
       setTimeRange(value);
-      setKeyframe(store.getKeyframe?.());
+      setKeyframe(store.getKeyframes?.());
       setTimeStamp(value[0]);
     });
 

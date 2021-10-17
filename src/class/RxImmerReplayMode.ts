@@ -15,7 +15,7 @@ export interface IReplayMode<T extends Objectish> {
 
   getTimeRange(): [number, number];
 
-  getKeyframe(): number[];
+  getKeyframes(): number[];
 
   replay(timeStamp: number): boolean;
 }
@@ -127,7 +127,7 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
       return [this.initialTimeStamp, this.terminalTimeStamp];
     }
 
-    public getKeyframe(): number[] {
+    public getKeyframes(): number[] {
       return this.flows.map((flow) => flow.timeStamp);
     }
 
