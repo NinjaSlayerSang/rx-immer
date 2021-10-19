@@ -1,6 +1,6 @@
 import type { Immutable } from 'immer/dist/internal';
 import { useEffect, useState } from 'react';
-import { get } from 'lodash';
+import { get, toPath } from 'lodash';
 
 import type { RxImmer } from '../class';
 import type { Path } from '../type';
@@ -26,7 +26,7 @@ export function useRxImmerBind<T>(rxImmer: RxImmer<T>, listenPath?: Path) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [rxImmer]);
+  }, [rxImmer, toPath(listenPath).join()]);
 
   return value;
 }

@@ -27,7 +27,7 @@
     "mockjs": "^1.1.0",
     "react": "17.x",
     "react-dom": "17.x",
-    "rx-immer": "^0.1.0",
+    "rx-immer": "^0.1",
     "umi": "^3.5.20"
   },
   "devDependencies": {

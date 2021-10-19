@@ -4,6 +4,7 @@ import { BehaviorSubject, buffer, debounceTime, Subject } from 'rxjs';
 
 import type { RxImmerBase } from './RxImmerBase';
 import type { HistoryConfig, PatchesTuple, PatchesTupleGroup } from '../type';
+import { reversePatchesTuple } from '../utils';
 
 export interface IWithHistory {
   roamStatus$: BehaviorSubject<[number, number]>;
@@ -88,7 +89,7 @@ export function generateWithHistory(
         this.recycle.push(records);
         records.reduceRight((_, record) => {
           this.store = applyPatches(this.store, record[1]);
-          this.patchesTuple$.next(record);
+          this.patchesTuple$.next(reversePatchesTuple(record));
           return undefined;
         }, undefined);
       }

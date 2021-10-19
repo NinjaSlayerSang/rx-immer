@@ -1,6 +1,6 @@
 import type { Immutable } from 'immer';
 import type { Draft, Objectish } from 'immer/dist/internal';
-import type { Observable } from 'rxjs';
+import { Observable, startWith } from 'rxjs';
 import { castImmutable, produceWithPatches } from 'immer';
 import { filter, map, Subject } from 'rxjs';
 import { get, isObjectLike } from 'lodash';
@@ -42,12 +42,16 @@ export class RxImmerBase<T extends Objectish> implements IRxImmerBase<T> {
 
   public observe(listenPath?: Path) {
     if (listenPath === undefined) {
-      return this.patchesTuple$.pipe(map(() => this.store));
+      return this.patchesTuple$.pipe(
+        map(() => this.store),
+        startWith(this.store)
+      );
     }
     const checkPath = isContained(listenPath);
     return this.patchesTuple$.pipe(
       filter((patches) => patches[0].some((patch) => checkPath(patch.path))),
-      map(() => get(this.store, listenPath))
+      map(() => get(this.store, listenPath)),
+      startWith(get(this.store, listenPath))
     );
   }
 

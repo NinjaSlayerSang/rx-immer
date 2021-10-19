@@ -24,11 +24,11 @@
 ### 不可变数据(immutable)
 
 使用[immer.js](https://immerjs.github.io/immer/)库维护应用状态对象的不可变性以及跟踪状态修改的增量信息。
-immer能够保持JavaScript可序列化对象的不可变性，当嵌套的对象树的深层属性值发生改变时，能够自动新建对象来记录修改，而不影响到旧有的对象。对于树状结构中未修改的对象则复用旧对象的引用来优化性能（区别于深拷贝，极大地避免内存浪费）。
+immer能够保持JavaScript可序列化对象的不可变性，当嵌套的对象树的深层属性值发生改变时，能够自动新建对象来记录修改，而不影响到旧有的对象。对于树状结构中未修改的对象则复用旧对象的引用来优化性能（区别于深拷贝，很大程度上避免内存浪费）。
 
 ### 响应式数据流(observable)
 
-使用[rxjs](https://rxjs.dev/)库构建用于通知订阅模式的可观察对象observable，用于分发能够应用状态改变的消息。rxjs是主流的响应式编程框架ReactiveX在JavaScript平台的版本，融合了通知订阅模式、迭代器模式、异步调度、函数式编程等多种范式，其特有的操作符能够让开发者方便地利用函数式编程范式解决复杂地业务逻辑，为程序带来良好的扩展性、低耦合性、易调试性等。
+使用[rxjs](https://rxjs.dev/)库构建用于通知订阅模式的可观察对象observable，用于分发能够应用状态改变的消息。rxjs是主流的响应式编程框架ReactiveX在JavaScript平台的版本，融合了通知订阅模式、迭代器模式、异步调度、函数式编程等多种范式，其特有的操作符能够让开发者方便地利用函数式编程范式解决复杂的业务逻辑，为程序带来良好的扩展性、低耦合性、易调试性等。
 
 ## 快速开始
 
@@ -83,7 +83,7 @@ subscription.unsubscribe(); // 解除监听
 `observe`实例方法接受一个*listenPath*参数，类型为**Path**(string | string[])，代表需要监听的目标在整个状态对象中的路径，用于指示监听的范围；例如`store.observe('a[0].b.c')`，即代表监听`state.a[0].b.c`的改变；如不传入参数，则监听整个state的变化。
 **Path**既可以是string，也可以是string数组；当path为string时，即代表以`.`与`[]`的语义书写路径；当path为string数组时，代表以*path components*的语义书写路径，两者等效：
 
-`a[0].b.c` = `['a', 0, 'b', 'c']`
+`'a[0].b.c'` = `['a', 0, 'b', 'c']`
 
 ```javascript
 const subscription = store.observe('a[0].b.c').subscribe((c) => {
