@@ -1,9 +1,13 @@
-import type { Objectish } from 'immer/dist/internal';
-import { applyPatches } from 'immer';
 import { BehaviorSubject, buffer, debounceTime, Subject } from 'rxjs';
+import { applyPatches } from 'immer';
 
 import type { RxImmerBase } from './RxImmerBase';
-import type { HistoryConfig, PatchesTuple, PatchesTupleGroup } from '../type';
+import type {
+  HistoryConfig,
+  Objectish,
+  PatchesTuple,
+  PatchesTupleGroup,
+} from '../type';
 import { reversePatchesTuple } from '../utils';
 
 export interface IWithHistory {

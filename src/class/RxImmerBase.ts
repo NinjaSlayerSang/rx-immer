@@ -1,11 +1,8 @@
-import type { Immutable } from 'immer';
-import type { Draft, Objectish } from 'immer/dist/internal';
-import { Observable, startWith } from 'rxjs';
-import { castImmutable, produceWithPatches } from 'immer';
-import { filter, map, Subject } from 'rxjs';
+import { filter, map, Observable, startWith, Subject } from 'rxjs';
+import { castImmutable, Draft, Immutable, produceWithPatches } from 'immer';
 import { get, isObjectLike } from 'lodash';
 
-import type { Patches, PatchesTuple, Path } from '../type';
+import type { Objectish, Patches, PatchesTuple, Path } from '../type';
 import { isCommitValid, isContained } from '../utils';
 import { NonObjectishError } from '../const';
 

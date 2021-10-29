@@ -1,9 +1,8 @@
-import type { Immutable, Objectish } from 'immer/dist/internal';
-import { applyPatches, castImmutable } from 'immer';
 import { BehaviorSubject } from 'rxjs';
+import { applyPatches, castImmutable, Immutable } from 'immer';
 
 import type { RxImmerBase } from './RxImmerBase';
-import type { PatchesTuple } from '../type';
+import type { Objectish, PatchesTuple } from '../type';
 
 export interface Flow {
   uid: number;

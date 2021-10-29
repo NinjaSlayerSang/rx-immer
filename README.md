@@ -11,8 +11,8 @@
   - [监听状态改变](#监听状态改变)
   - [修改状态](#修改状态)
   - [销毁实例](#销毁实例)
-- [在React中使用](#在react中使用)
-  - [创建实例](#创建实例-1)
+- [在React项目中使用](#在react项目中使用)
+  - [创建实例并挂载到组件](#创建实例并挂载到组件)
   - [将状态绑定到组件](#将状态绑定到组件)
 - [扩展功能](#扩展功能)
   - [操作记录栈](#操作记录栈)
@@ -40,7 +40,25 @@ rx-immer具有非常简易实用的基础功能API，使用者不需要关注任
 npm install rx-immer --save
 ```
 
+#### 使用React版本
+
+*注意：在v0.1.2之后，rx-immer将与React搭配使用的代码单独封装为rx-immer-react包*
+
+```bash
+npm install rx-immer-react --save
+```
+
 ### 创建实例
+
+#### 快速创建
+
+```javascript
+import { createRxImmer } from 'rx-immer';
+
+const store = createRxImmer({});
+```
+
+#### 工厂模式
 
 ```javascript
 import { factory } from 'rx-immer';
@@ -48,7 +66,7 @@ import { factory } from 'rx-immer';
 const store = new (factory())({});
 ```
 
-rx-immer使用**工厂模式**创建实例，`factory`函数为类工厂，可接受配置项参数，返回被配置的类，即可使用`new`关键字构建实例。构造函数接受一个**可序列化**的对象（例如Object、Array、Map、Set，可多层嵌套）参数，作为实例的初始状态值。
+rx-immer可使用**工厂模式**创建实例，`factory`函数为类工厂，可接受配置项参数，返回被配置的类，即可使用`new`关键字构建实例。构造函数接受一个**可序列化**的对象（例如Object、Array、Map、Set，可多层嵌套）参数，作为实例的初始状态值。
 
 在*TypeScript*中，`factory<T>`作为泛型函数，能够显式地指定类型，指示状态值的类型信息：
 
@@ -66,9 +84,23 @@ const CustomRxImmer = factory<IState>(); // 不传入配置项参数，使用默
 const store = new CustomRxImmer({ id: 0, name: 'abc', status: true });
 ```
 
-在*React*中使用时，可以利用内置的自定义hooks更简单地创建实例。具体用法将在后面的章节中介绍。
+*v0.1.2*之后的版本提供了快捷使用的工厂函数`createRxImmer<T>`直接创建实例：
+
+```typescript
+import { createRxImmer } from 'rx-immer';
+
+const store = createRxImmer({ id: 0, name: 'abc', status: true }, { /* 配置项 */ });
+// createRxImmer<T>可显式指定state类型，也可让编译器根据初始状态值推断
+// 第二个参数为可选的配置项
+```
+
+#### 在React项目中使用
+
+在*React*中使用时，可以利用自定义hooks更简单地创建实例。具体用法将在[后面](#创建实例并挂载到组件)的章节中介绍。
 
 ### 监听状态改变
+
+#### 监听与解除监听
 
 ```javascript
 const subscription = store.observe().subscribe((state) => {
@@ -79,6 +111,8 @@ subscription.unsubscribe(); // 解除监听
 ```
 
 `observe`实例方法返回一个**Observable**对象，关于Observable对象的细节可查阅[rxjs文档](https://cn.rx.js.org/manual/overview.html)。
+
+#### 通过路径指定监听的目标
 
 `observe`实例方法接受一个*listenPath*参数，类型为**Path**(string | string[])，代表需要监听的目标在整个状态对象中的路径，用于指示监听的范围；例如`store.observe('a[0].b.c')`，即代表监听`state.a[0].b.c`的改变；如不传入参数，则监听整个state的变化。
 **Path**既可以是string，也可以是string数组；当path为string时，即代表以`.`与`[]`的语义书写路径；当path为string数组时，代表以*path components*的语义书写路径，两者等效：
@@ -105,7 +139,9 @@ const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
 
 **注意：**在监听使用结束后，需要执行`subscription.unsubscribe()`解除监听以释放资源。
 
-在*React*中使用时，可以利用内置的自定义hooks更简单地绑定状态到组件的state，并且，在React组件卸载时，绑定的监听也会自动解除。具体用法将在后面的章节中介绍。
+#### 在React项目中使用
+
+在*React*中使用时，可以利用自定义hooks更简单地绑定状态到组件的state，并且，在React组件卸载时，绑定的监听也会自动解除。具体用法将在[后面](#将状态绑定到组件)的章节中介绍。
 
 ### 修改状态
 
@@ -175,11 +211,11 @@ store.destroy();
 
 清理实例内部监听事件链，如果手动创建实例，请保证在实例生命周期结束时显式调用`destroy`方法。
 
-## 在React中使用
+## 在React项目中使用
 
-框架内置了自定义hooks方便在React项目中更加便捷地使用rx-immer：
+rx-immer-react包含自定义hooks方便在React项目中更加便捷地使用rx-immer：
 
-### 创建实例
+### 创建实例并挂载到组件
 
 ```javascript
 const store = useRxImmer({});
@@ -191,7 +227,7 @@ const store = useRxImmer({});
 并且，`useRxImmer`接受第一个参数，作为状态的初始值，可选地接受第二个参数*config*，作为实例创建的配置项。
 
 ```typescript
-import { useRxImmer } from 'rx-immer';
+import { useRxImmer } from 'rx-immer-react';
 
 interface IState {
   id: number;
@@ -228,7 +264,7 @@ const c = store.useBind<number>('a[0].b.c');
 *注意：useBind等注入到实例方法中的自定义hooks会通过Mixin模式依据配置动态注入，注入过程发生在useRxImmer中。因此，只有通过useRxImmer创建的实例会自动含有内联的自定义hooks，如果通过其他方式创建，则需要手动注入hooks：*
 
 ```javascript
-import { injectUseBind } from 'rx-immer';
+import { injectUseBind } from 'rx-immer-react';
 
 // 不通过useRxImmer创建实例store...
 

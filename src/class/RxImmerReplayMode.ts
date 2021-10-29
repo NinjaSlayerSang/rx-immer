@@ -1,11 +1,10 @@
-import type { Objectish } from 'immer/dist/internal';
-import { applyPatches, castImmutable } from 'immer';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { applyPatches, castImmutable } from 'immer';
 import { get, range } from 'lodash';
 
 import type { RxImmerBase } from './RxImmerBase';
 import type { Diachrony, Flow } from './RxImmerWithDiachrony';
-import type { Path } from '../type';
+import type { Objectish, Path } from '../type';
 import { reversePatchesTuple } from '../utils';
 
 export interface IReplayMode<T extends Objectish> {
