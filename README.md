@@ -40,9 +40,9 @@ rx-immer具有非常简易实用的基础功能API，使用者不需要关注任
 npm install rx-immer --save
 ```
 
-#### 使用React版本
+#### 在React项目中
 
-*注意：在v0.1.2之后，rx-immer将与React搭配使用的代码单独封装为rx-immer-react包*
+*注意：在v0.1.2之后，rx-immer与react搭配使用的代码被单独封装为rx-immer-react包，对react的依赖也从rx-immer中移除*
 
 ```bash
 npm install rx-immer-react --save
@@ -94,7 +94,7 @@ const store = createRxImmer({ id: 0, name: 'abc', status: true }, { /* 配置项
 // 第二个参数为可选的配置项
 ```
 
-#### 在React项目中使用
+#### 在React项目中
 
 在*React*中使用时，可以利用自定义hooks更简单地创建实例。具体用法将在[后面](#创建实例并挂载到组件)的章节中介绍。
 
@@ -139,7 +139,7 @@ const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
 
 **注意：**在监听使用结束后，需要执行`subscription.unsubscribe()`解除监听以释放资源。
 
-#### 在React项目中使用
+#### 在React项目中
 
 在*React*中使用时，可以利用自定义hooks更简单地绑定状态到组件的state，并且，在React组件卸载时，绑定的监听也会自动解除。具体用法将在[后面](#将状态绑定到组件)的章节中介绍。
 
