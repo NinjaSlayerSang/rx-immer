@@ -1,6 +1,6 @@
 import { toPath } from 'lodash';
 
-import type { PatchesTuple, Path, TrimmedPath } from '../type';
+import type { PatchesTuple, Path, TrimmedPath } from '../../type';
 
 export const isContained =
   (rawListenPath: Path) => (targetPath: TrimmedPath) => {

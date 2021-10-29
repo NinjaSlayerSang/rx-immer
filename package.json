@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -21,9 +21,9 @@
   },
   "peerDependencies": {
     "immer": ">=9",
-    "lodash": ">=4.17",
-    "react": ">=16",
-    "rxjs": ">=7.4"
+    "lodash": ">=4",
+    "lodash-es": ">=4",
+    "rxjs": ">=7"
   },
   "husky": {
     "hooks": {
@@ -50,20 +50,13 @@
     }
   ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^6.0.1",
-    "@types/lodash": "^4.14.175",
-    "@types/react": "^17.0.27",
-    "@types/react-dom": "^17.0.9",
-    "husky": "^7.0.2",
+    "@size-limit/preset-small-lib": "^6.0.3",
+    "@types/lodash": "^4.14.176",
+    "husky": "^7.0.4",
     "prettier": "^2.4.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "size-limit": "^6.0.1",
+    "size-limit": "^6.0.3",
     "tsdx": "^0.14.1",
     "tslib": "^2.3.1",
-    "typescript": "^3.9.10"
-  },
-  "dependencies": {
-    "lodash-es": ">=4.17"
+    "typescript": "^4.4.4"
   }
 }

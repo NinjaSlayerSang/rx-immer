@@ -1,7 +1,6 @@
-import type { Objectish } from 'immer/dist/internal';
 import { defaultsDeep } from 'lodash';
 
-import type { Config, DeepPartial } from '../type';
+import type { Config, DeepPartial, Objectish } from '../type';
 import { IRxImmerBase, RxImmerBase } from './RxImmerBase';
 import { generateWithHistory, IWithHistory } from './RxImmerWithHistory';
 import { generateWithDiachrony, IWithDiachrony } from './RxImmerWithDiachrony';
@@ -38,4 +37,11 @@ export function factory<T extends Objectish>(config?: DeepPartial<Config>) {
   }
 
   return Cls;
+}
+
+export function createRxImmer<T extends Objectish>(
+  initial: T,
+  config?: DeepPartial<Config>
+) {
+  return new (factory<T>(config))(initial);
 }
