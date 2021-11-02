@@ -11,6 +11,8 @@ import type {
 import { reversePatchesTuple } from '../utils';
 
 export interface IWithHistory {
+  withHistory: true;
+
   roamStatus$: BehaviorSubject<[number, number]>;
 
   getRoamStatus(): [number, number];
@@ -34,6 +36,8 @@ export function generateWithHistory(
     private history: PatchesTupleGroup[] = [];
     private recycle: PatchesTupleGroup[] = [];
     private historyBufferPool$ = new Subject<PatchesTuple>();
+
+    public withHistory: true = true;
 
     public roamStatus$ = new BehaviorSubject<[number, number]>([0, 0]);
 

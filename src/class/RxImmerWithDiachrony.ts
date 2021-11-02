@@ -19,6 +19,8 @@ export interface Diachrony<T extends Objectish> {
 }
 
 export interface IWithDiachrony<T extends Objectish> {
+  withDiachrony: true;
+
   size$: BehaviorSubject<number>;
 
   size(): number;
@@ -35,6 +37,8 @@ export function generateWithDiachrony(Cls: typeof RxImmerBase): any {
     private anchor: Immutable<T>;
     private anchorTimeStamp: number;
     private flows: Flow[] = [];
+
+    public withDiachrony: true = true;
 
     public size$ = new BehaviorSubject<number>(0);
 

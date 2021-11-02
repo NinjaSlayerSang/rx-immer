@@ -8,6 +8,8 @@ import type { Objectish, Path } from '../type';
 import { reversePatchesTuple } from '../utils';
 
 export interface IReplayMode<T extends Objectish> {
+  replayMode: true;
+
   timeRange$: BehaviorSubject<[number, number]>;
 
   setDiachrony(diachrony: Diachrony<T>): void;
@@ -28,6 +30,8 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
     private terminalTimeStamp: number;
     private flows: Flow[] = [];
     private cursor = 0;
+
+    public replayMode: true = true;
 
     public timeRange$: BehaviorSubject<[number, number]>;
 
