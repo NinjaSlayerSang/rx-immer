@@ -1,6 +1,6 @@
 import type { Base } from './Base';
 
-type AffairKey = number | string | symbol;
+type AffairKey = number | string;
 
 type Dispose = () => void;
 
@@ -12,7 +12,9 @@ export interface AffairToken {
 export interface IFacility {
   startAffair(effect: () => Dispose, key?: AffairKey): AffairToken;
 
-  stopAffair(token: AffairToken): boolean;
+  stopAffair(mark: AffairToken | AffairKey): boolean;
+
+  showAffairs(): AffairKey[];
 }
 
 export function generateFacility(Cls: typeof Base): any {
@@ -69,6 +71,10 @@ export function generateFacility(Cls: typeof Base): any {
         return true;
       }
       return false;
+    }
+
+    public showAffairs() {
+      return Object.keys(this.affairs);
     }
   };
 }
