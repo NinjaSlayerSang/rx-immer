@@ -10,7 +10,7 @@ import { DEFAULT_CONFIG } from '../const';
 
 export type { Diachrony } from './WithDiachrony';
 
-interface IConfig {
+export interface IConfig {
   readonly config: Config;
 }
 
@@ -25,7 +25,9 @@ export interface Constructable<T extends Objectish> {
   new (initial: T): RxImmer<T>;
 }
 
-export function factory<T extends Objectish>(config?: DeepPartial<Config>) {
+export function factory<T extends Objectish>(
+  config?: DeepPartial<Config>
+): Constructable<T> {
   const finalConfig: Config = defaultsDeep({}, config, DEFAULT_CONFIG);
 
   let Cls: any = class extends Base<T> implements IConfig {
@@ -47,7 +49,7 @@ export function factory<T extends Objectish>(config?: DeepPartial<Config>) {
     Cls = generateWithDiachrony(Cls);
   }
 
-  return Cls as Constructable<T>;
+  return Cls;
 }
 
 export function create<T extends Objectish>(
