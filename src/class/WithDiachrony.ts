@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { applyPatches, castImmutable, Immutable } from 'immer';
 
-import type { RxImmerBase } from './RxImmerBase';
+import type { Base } from './Base';
 import type { Objectish, PatchesTuple } from '../type';
 
 export interface Flow {
@@ -18,7 +18,7 @@ export interface Diachrony<T extends Objectish> {
   archiveTimeStamp: number;
 }
 
-export interface IWithDiachrony<T extends Objectish> {
+export interface IWithDiachrony<T> {
   withDiachrony: true;
 
   size$: BehaviorSubject<number>;
@@ -28,11 +28,8 @@ export interface IWithDiachrony<T extends Objectish> {
   archive(): Diachrony<T>;
 }
 
-export function generateWithDiachrony(Cls: typeof RxImmerBase): any {
-  return class RxImmerWithDiachrony<T extends Objectish>
-    extends Cls<T>
-    implements IWithDiachrony<T>
-  {
+export function generateWithDiachrony(Cls: typeof Base): any {
+  return class<T> extends Cls<T> implements IWithDiachrony<T> {
     private uuid = -1;
     private anchor: Immutable<T>;
     private anchorTimeStamp: number;
@@ -54,13 +51,15 @@ export function generateWithDiachrony(Cls: typeof RxImmerBase): any {
     }
 
     // inherit
-    destroy() {
-      super.destroy();
 
+    destroy() {
       this.size$.complete();
+
+      super.destroy();
     }
 
     // private
+
     private appendFlow(patchesTuple: PatchesTuple) {
       this.flows.push({
         uid: this.getUuid(),
@@ -76,6 +75,7 @@ export function generateWithDiachrony(Cls: typeof RxImmerBase): any {
     }
 
     // implements
+
     public size() {
       return this.flows.length;
     }

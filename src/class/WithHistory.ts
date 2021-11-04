@@ -1,13 +1,8 @@
 import { BehaviorSubject, buffer, debounceTime, Subject } from 'rxjs';
 import { applyPatches } from 'immer';
 
-import type { RxImmerBase } from './RxImmerBase';
-import type {
-  HistoryConfig,
-  Objectish,
-  PatchesTuple,
-  PatchesTupleGroup,
-} from '../type';
+import type { Base } from './Base';
+import type { HistoryConfig, PatchesTuple, PatchesTupleGroup } from '../type';
 import { reversePatchesTuple } from '../utils';
 
 export interface IWithHistory {
@@ -23,13 +18,10 @@ export interface IWithHistory {
 }
 
 export function generateWithHistory(
-  Cls: typeof RxImmerBase,
+  Cls: typeof Base,
   config: HistoryConfig
 ): any {
-  return class RxImmerWithHistory<T extends Objectish>
-    extends Cls<T>
-    implements IWithHistory
-  {
+  return class<T> extends Cls<T> implements IWithHistory {
     private historyCapacity = config.capacity;
     private historyBufferDebounce = config.bufferDebounce;
 
@@ -58,6 +50,7 @@ export function generateWithHistory(
     }
 
     // inherit
+
     onCommit(record: PatchesTuple) {
       super.onCommit(record);
 
@@ -65,13 +58,14 @@ export function generateWithHistory(
     }
 
     destroy() {
-      super.destroy();
-
       this.historyBufferPool$.complete();
       this.roamStatus$.complete();
+
+      super.destroy();
     }
 
     // private
+
     private onRoamStatusChange() {
       this.roamStatus$.next(this.getRoamStatus());
     }
@@ -87,6 +81,7 @@ export function generateWithHistory(
     }
 
     // implements
+
     public getRoamStatus(): [number, number] {
       return [this.history.length, this.recycle.length];
     }
