@@ -2,12 +2,14 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { applyPatches, castImmutable } from 'immer';
 import { get, range } from 'lodash';
 
-import type { RxImmerBase } from './RxImmerBase';
-import type { Diachrony, Flow } from './RxImmerWithDiachrony';
-import type { Objectish, Path } from '../type';
+import type { Base } from './Base';
+import type { Diachrony, Flow } from './WithDiachrony';
+import type { Path } from '../type';
 import { reversePatchesTuple } from '../utils';
 
-export interface IReplayMode<T extends Objectish> {
+export interface IReplayMode<T> {
+  replayMode: true;
+
   timeRange$: BehaviorSubject<[number, number]>;
 
   setDiachrony(diachrony: Diachrony<T>): void;
@@ -19,15 +21,14 @@ export interface IReplayMode<T extends Objectish> {
   replay(timeStamp: number): boolean;
 }
 
-export function generateReplayMode(Cls: typeof RxImmerBase): any {
-  return class RxImmerReplayMode<T extends Objectish>
-    extends Cls<T>
-    implements IReplayMode<T>
-  {
+export function generateReplayMode(Cls: typeof Base): any {
+  return class<T> extends Cls<T> implements IReplayMode<T> {
     private initialTimeStamp: number;
     private terminalTimeStamp: number;
     private flows: Flow[] = [];
     private cursor = 0;
+
+    public replayMode: true = true;
 
     public timeRange$: BehaviorSubject<[number, number]>;
 
@@ -43,6 +44,7 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
     }
 
     // inherit
+
     observe(listenPath?: Path) {
       const observe = super.observe(listenPath);
 
@@ -59,12 +61,13 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
     commit() {}
 
     destroy() {
-      super.destroy();
-
       this.timeRange$.complete();
+
+      super.destroy();
     }
 
     // private
+
     private shiftRight() {
       const { patchesTuple } = this.flows[this.cursor];
       this.store = applyPatches(this.store, patchesTuple[0]);
@@ -109,6 +112,7 @@ export function generateReplayMode(Cls: typeof RxImmerBase): any {
     }
 
     // implements
+
     public size() {
       return this.flows.length;
     }

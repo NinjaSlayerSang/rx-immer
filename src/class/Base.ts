@@ -6,7 +6,7 @@ import type { Objectish, Patches, PatchesTuple, Path } from '../type';
 import { isCommitValid, isContained } from '../utils';
 import { NonObjectishError } from '../const';
 
-export interface IRxImmerBase<T extends Objectish> {
+export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
 
   observe(): Observable<Immutable<T>>;
@@ -18,12 +18,16 @@ export interface IRxImmerBase<T extends Objectish> {
     targetPath: Path
   ): void;
 
+  readonly destroyed: boolean;
+
   destroy(): void;
 }
 
-export class RxImmerBase<T extends Objectish> implements IRxImmerBase<T> {
+export class Base<T extends Objectish> implements IBase<T> {
   protected store: Immutable<T>;
   protected patchesTuple$ = new Subject<PatchesTuple>();
+
+  public destroyed = false;
 
   public constructor(initial: T) {
     this.store = castImmutable(initial);
@@ -76,5 +80,6 @@ export class RxImmerBase<T extends Objectish> implements IRxImmerBase<T> {
 
   public destroy() {
     this.patchesTuple$.complete();
+    this.destroyed = true;
   }
 }

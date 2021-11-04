@@ -1,45 +1,58 @@
 import { defaultsDeep } from 'lodash';
 
 import type { Config, DeepPartial, Objectish } from '../type';
-import { IRxImmerBase, RxImmerBase } from './RxImmerBase';
-import { generateWithHistory, IWithHistory } from './RxImmerWithHistory';
-import { generateWithDiachrony, IWithDiachrony } from './RxImmerWithDiachrony';
-import { generateReplayMode, IReplayMode } from './RxImmerReplayMode';
+import { Base, IBase } from './Base';
+import { generateFacility, IFacility } from './Facility';
+import { generateWithHistory, IWithHistory } from './WithHistory';
+import { generateWithDiachrony, IWithDiachrony } from './WithDiachrony';
+import { generateReplayMode, IReplayMode } from './ReplayMode';
 import { DEFAULT_CONFIG } from '../const';
 
-export type { Diachrony } from './RxImmerWithDiachrony';
+export type { Diachrony } from './WithDiachrony';
 
-export type RxImmer<T extends Objectish> = IRxImmerBase<T> &
+export interface IConfig {
+  readonly config: Config;
+}
+
+export type RxImmer<T extends Objectish> = IBase<T> &
+  IConfig &
+  IFacility &
   Partial<IWithHistory> &
   Partial<IWithDiachrony<T>> &
   Partial<IReplayMode<T>>;
 
-interface RxImmerConstructable<T extends Objectish> {
+export interface Constructable<T extends Objectish> {
   new (initial: T): RxImmer<T>;
 }
 
-export function factory<T extends Objectish>(config?: DeepPartial<Config>) {
+export function factory<T extends Objectish>(
+  config?: DeepPartial<Config>
+): Constructable<T> {
   const finalConfig: Config = defaultsDeep({}, config, DEFAULT_CONFIG);
 
-  let Cls: RxImmerConstructable<T> = RxImmerBase;
+  let Cls: any = class extends Base<T> implements IConfig {
+    public readonly config: Config = finalConfig;
+  };
+
+  Cls = generateFacility(Cls);
 
   if (finalConfig.replay) {
-    Cls = generateReplayMode(Cls as typeof RxImmerBase);
+    Cls = generateReplayMode(Cls);
     return Cls;
   }
 
   if (finalConfig.history) {
-    Cls = generateWithHistory(Cls as typeof RxImmerBase, finalConfig.history);
+    Cls = generateWithHistory(Cls, finalConfig.history);
   }
 
   if (finalConfig.diachrony) {
-    Cls = generateWithDiachrony(Cls as typeof RxImmerBase);
+    Cls = generateWithDiachrony(Cls);
   }
 
   return Cls;
 }
 
-export function createRxImmer<T extends Objectish>(
+export function create<T extends Objectish>(
   initial: T,
   config?: DeepPartial<Config>
 ) {

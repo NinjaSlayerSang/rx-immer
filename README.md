@@ -12,8 +12,6 @@
   - [修改状态](#修改状态)
   - [销毁实例](#销毁实例)
 - [在React项目中使用](#在react项目中使用)
-  - [创建实例并挂载到组件](#创建实例并挂载到组件)
-  - [将状态绑定到组件](#将状态绑定到组件)
 - [扩展功能](#扩展功能)
   - [操作记录栈](#操作记录栈)
   - [历史归档及场景还原](#历史归档及场景还原)
@@ -53,9 +51,9 @@ npm install rx-immer-react --save
 #### 快速创建
 
 ```javascript
-import { createRxImmer } from 'rx-immer';
+import { create } from 'rx-immer';
 
-const store = createRxImmer({});
+const store = create({});
 ```
 
 #### 工厂模式
@@ -79,24 +77,24 @@ interface IState {
   status: boolean;
 }
 
-const CustomRxImmer = factory<IState>(); // 不传入配置项参数，使用默认配置
+const CustomStore = factory<IState>(); // 不传入配置项参数，使用默认配置
 
-const store = new CustomRxImmer({ id: 0, name: 'abc', status: true });
+const store = new CustomStore({ id: 0, name: 'abc', status: true });
 ```
 
-*v0.1.2*之后的版本提供了快捷使用的工厂函数`createRxImmer<T>`直接创建实例：
+*v0.1.2*之后的版本提供了快捷使用的工厂函数`create<T>`直接创建实例：
 
 ```typescript
-import { createRxImmer } from 'rx-immer';
+import { create } from 'rx-immer';
 
-const store = createRxImmer({ id: 0, name: 'abc', status: true }, { /* 配置项 */ });
-// createRxImmer<T>可显式指定state类型，也可让编译器根据初始状态值推断
+const store = create({ id: 0, name: 'abc', status: true }, { /* 配置项 */ });
+// create<T>可显式指定state类型，也可让编译器根据初始状态值推断
 // 第二个参数为可选的配置项
 ```
 
 #### 在React项目中
 
-在*React*中使用时，可以利用自定义hooks更简单地创建实例。具体用法将在[后面](#创建实例并挂载到组件)的章节中介绍。
+rx-immer-react提供了自定义hooks更简单地创建实例。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%88%9B%E5%BB%BA%E5%AE%9E%E4%BE%8B%E5%B9%B6%E6%8C%82%E8%BD%BD%E5%88%B0%E7%BB%84%E4%BB%B6)。
 
 ### 监听状态改变
 
@@ -141,7 +139,7 @@ const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
 
 #### 在React项目中
 
-在*React*中使用时，可以利用自定义hooks更简单地绑定状态到组件的state，并且，在React组件卸载时，绑定的监听也会自动解除。具体用法将在[后面](#将状态绑定到组件)的章节中介绍。
+rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state。并且，在React组件卸载时，绑定的监听也会自动解除。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%B0%86%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A%E5%88%B0%E7%BB%84%E4%BB%B6)。
 
 ### 修改状态
 
@@ -213,63 +211,7 @@ store.destroy();
 
 ## 在React项目中使用
 
-rx-immer-react包含自定义hooks方便在React项目中更加便捷地使用rx-immer：
-
-### 创建实例并挂载到组件
-
-```javascript
-const store = useRxImmer({});
-```
-
-内部使用了*useRef*来创建并挂载实例，并且在React组件卸载时自动调用实例的`destroy`方法。
-
-在TypeScript中，`useRxImmer<T>`作为泛型函数，能够显式地指定类型，指示状态值的类型信息。
-并且，`useRxImmer`接受第一个参数，作为状态的初始值，可选地接受第二个参数*config*，作为实例创建的配置项。
-
-```typescript
-import { useRxImmer } from 'rx-immer-react';
-
-interface IState {
-  id: number;
-  name: string;
-  status: boolean;
-}
-
-// 在React组件中...
-
-const store = useRxImmer<IState>(
-    { id: 0, name: 'abc', status: true }, // 初始状态
-    { history: { capacity: 1000 } }, // 配置项
-  );
-```
-
-配置项详情将在后面的章节中介绍。
-
-### 将状态绑定到组件
-
-```javascript
-const state = store.useBind();
-const c = store.useBind('a[0].b.c');
-```
-
-内部使用*useState*将rx-immer实例状态与组件状态相绑定，当实例state发生改变，相关的所有组件将重新渲染（且只有改动影响到的组件会发生重新渲染）。组件卸载后，绑定的监听将会自动解除。
-
-同样，在TypeScript中，`useBind<T>`作为实例的泛型方法，能够显式地指定类型，指示监听目标的类型信息。
-
-```typescript
-const c = store.useBind<number>('a[0].b.c');
-// TypeScript编译器此时能知道c的类型为number
-```
-
-*注意：useBind等注入到实例方法中的自定义hooks会通过Mixin模式依据配置动态注入，注入过程发生在useRxImmer中。因此，只有通过useRxImmer创建的实例会自动含有内联的自定义hooks，如果通过其他方式创建，则需要手动注入hooks：*
-
-```javascript
-import { injectUseBind } from 'rx-immer-react';
-
-// 不通过useRxImmer创建实例store...
-
-const storeWithUseBind = injectUseBind(store);
-```
+rx-immer-react包含一系列扩展方便在React项目中使用rx-immer，具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react)。
 
 ## 扩展功能
 
@@ -293,14 +235,6 @@ store.recover?.(); // 重做
 > - Q：为什么要使用`?.`操作符？
 > - A：扩展功能是根据配置项动态加载的，当相关配置项指定为关闭时，扩展功能不会加载，此时实例相关功能的方法是空值。对于TypeScript编译器来说，因为配置项具有动态性，是无法准确推断实例的具体派生类型，此时将扩展功能的方法指定为可空类型是一个安全的实践。
 
-在*React*中，可以利用扩展功能附带的自定义hooks将操作记录栈状态信息绑定到组件state中：
-
-```javascript
-const [undos, redos] = store.useRoamStatus?.() ?? [0, 0];
-```
-
-*同样的，useRoamStatus这个内联到实例内部的自定义hooks是在useRxImmer中动态注入到实例方法中的，只有通过useRxImmer创建的实例会依据配置项中是否开启相关扩展功能可选地包含自定义hooks。*
-
 ### 历史归档及场景还原
 
 rx-immer内置了一个实验性的扩展功能，能够记录下应用状态的**详细变更历史**并进行归档。这不同于操作记录栈功能，操作记录栈功能可以方便使用者在变更提交中时间漫游，撤销或重做操作；而开启详细变更历史记录功能后，实例将会存储每一次变更细节，即使是操作记录栈的撤销或重做，也会作为一次变更历史进行归档。
@@ -313,7 +247,7 @@ rx-immer内置了一个实验性的扩展功能，能够记录下应用状态的
 #### 历史归档
 
 ```javascript
-const store = useRxImmer({}, { diachrony: true }); // 配置开启历史归档功能
+const store = create({}, { diachrony: true }); // 配置开启历史归档功能
 
 const size = store.size?.(); // 查询当前历史记录的长度
 const size = store.useDiachronySize?.() // 在React中，可将历史记录长度状态绑定到组件状态中
@@ -345,7 +279,7 @@ interface Diachrony<T extends Objectish> {
 并且，实例的`commit`方法也将不生效（实例切换为只读模式）。
 
 ```javascript
-const store = useRxImmer({}, { replay: true }); // 配置开启场景还原模式
+const store = create({}, { replay: true }); // 配置开启场景还原模式
 
 store.timeRange$ // 流数据，当前播放的历史归档的起始结束时间戳，可以调用subscribe以监听变化
 
@@ -358,7 +292,7 @@ store.replay?.(timeStamp); // 将播放指针移动到某个时间戳
 
 如果应用使用rx-immer框架管理状态，在绝大多数情况下，不需要对**项目的业务代码**进行任何修改，只需要将创建的实例切换到场景还原模式，便可以插入某个历史归档信息进行观看。
 
-*在example演示项目中有详细的使用演示，并且演示了如何使用rx-immer管理antd的表单组件状态：只需轻松添加两行代码即可将现有的antd表单组件纳入rx-immer框架管理，给表单添加用户操作撤销、重做，记录与重播用户表单操作轨迹的功能。*
+*在演示项目中有详细的使用演示，并且演示了如何使用rx-immer管理antd的表单组件状态：只需轻松添加两行代码即可将现有的antd表单组件纳入rx-immer框架管理，给表单添加用户操作撤销、重做，记录与重播用户表单操作轨迹的功能。*
 
 ## 配置
 
