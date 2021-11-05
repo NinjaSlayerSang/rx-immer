@@ -1,18 +1,18 @@
 import type { Base } from './Base';
 
-type AffairKey = number | string;
+export type AffairKey = number | string;
 
 type Dispose = () => void;
 
-export interface AffairToken {
+interface AffairToken {
   key: AffairKey;
   dispose: Dispose;
 }
 
 export interface IFacility {
-  startAffair(effect: () => Dispose, key?: AffairKey): AffairToken;
+  startAffair(effect: () => Dispose, key?: AffairKey): AffairKey;
 
-  stopAffair(mark: AffairToken | AffairKey): boolean;
+  stopAffair(mark: AffairKey): boolean;
 
   showAffairs(): AffairKey[];
 }
@@ -45,29 +45,18 @@ export function generateFacility(Cls: typeof Base): any {
     public startAffair(
       effect: () => Dispose,
       key: AffairKey = this.getAffairKey()
-    ): AffairToken {
-      this.affairs[key]?.dispose.call(this);
+    ) {
+      this.stopAffair(key);
 
       const dispose = effect.call(this);
-      const token: AffairToken = { key, dispose };
-      this.affairs[key] = token;
-      return token;
+      this.affairs[key] = { key, dispose };
+      return key;
     }
 
-    public stopAffair(mark: AffairToken | AffairKey): boolean {
-      if (typeof mark === 'object') {
-        const { key } = mark;
-        if (this.affairs[key]) {
-          mark.dispose.call(this);
-          delete this.affairs[key];
-          return true;
-        }
-        return false;
-      }
-
-      if (this.affairs[mark]) {
-        this.affairs[mark].dispose.call(this);
-        delete this.affairs[mark];
+    public stopAffair(key: AffairKey): boolean {
+      if (this.affairs[key]) {
+        this.affairs[key].dispose.call(this);
+        delete this.affairs[key];
         return true;
       }
       return false;
