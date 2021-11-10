@@ -10,7 +10,7 @@ export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
 
   observe(): Observable<Immutable<T>>;
-  observe<V = any>(listenPath: Path): Observable<Immutable<V> | undefined>;
+  observe<V = any>(listenPath: Path): Observable<Immutable<V>>;
 
   commit(recipe: (draft: Draft<T>) => void): void;
   commit<V extends Objectish>(

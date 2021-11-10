@@ -2,24 +2,27 @@ import type { Base } from './Base';
 
 export type AffairKey = number | string;
 
-type Dispose = () => void;
+type Dispose<T> = (this: T) => void;
 
-interface AffairToken {
+interface AffairToken<T> {
   key: AffairKey;
-  dispose: Dispose;
+  dispose: Dispose<T>;
 }
 
 export interface IFacility {
-  startAffair(effect: () => Dispose, key?: AffairKey): AffairKey;
+  startAffair(
+    effect: (this: this) => Dispose<this>,
+    key?: AffairKey
+  ): AffairKey;
 
-  stopAffair(mark: AffairKey): boolean;
+  stopAffair(key: AffairKey): boolean;
 
   showAffairs(): AffairKey[];
 }
 
 export function generateFacility(Cls: typeof Base): any {
   return class<T> extends Cls<T> implements IFacility {
-    private affairs: Record<AffairKey, AffairToken> = {};
+    private affairs: Record<AffairKey, AffairToken<this>> = {};
     private defaultAffairKey = 0;
 
     // inherit
@@ -43,7 +46,7 @@ export function generateFacility(Cls: typeof Base): any {
     // implements
 
     public startAffair(
-      effect: () => Dispose,
+      effect: (this: this) => Dispose<this>,
       key: AffairKey = this.getAffairKey()
     ) {
       this.stopAffair(key);
