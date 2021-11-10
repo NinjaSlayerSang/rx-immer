@@ -1,25 +1,28 @@
 import type { Base } from './Base';
 
-type AffairKey = number | string;
+export type AffairKey = number | string;
 
-type Dispose = () => void;
+type Dispose<T> = (this: T) => void;
 
-export interface AffairToken {
+interface AffairToken<T> {
   key: AffairKey;
-  dispose: Dispose;
+  dispose: Dispose<T>;
 }
 
 export interface IFacility {
-  startAffair(effect: () => Dispose, key?: AffairKey): AffairToken;
+  startAffair(
+    effect: (this: this) => Dispose<this>,
+    key?: AffairKey
+  ): AffairKey;
 
-  stopAffair(mark: AffairToken | AffairKey): boolean;
+  stopAffair(key: AffairKey): boolean;
 
   showAffairs(): AffairKey[];
 }
 
 export function generateFacility(Cls: typeof Base): any {
   return class<T> extends Cls<T> implements IFacility {
-    private affairs: Record<AffairKey, AffairToken> = {};
+    private affairs: Record<AffairKey, AffairToken<this>> = {};
     private defaultAffairKey = 0;
 
     // inherit
@@ -43,31 +46,20 @@ export function generateFacility(Cls: typeof Base): any {
     // implements
 
     public startAffair(
-      effect: () => Dispose,
+      effect: (this: this) => Dispose<this>,
       key: AffairKey = this.getAffairKey()
-    ): AffairToken {
-      this.affairs[key]?.dispose.call(this);
+    ) {
+      this.stopAffair(key);
 
       const dispose = effect.call(this);
-      const token: AffairToken = { key, dispose };
-      this.affairs[key] = token;
-      return token;
+      this.affairs[key] = { key, dispose };
+      return key;
     }
 
-    public stopAffair(mark: AffairToken | AffairKey): boolean {
-      if (typeof mark === 'object') {
-        const { key } = mark;
-        if (this.affairs[key]) {
-          mark.dispose.call(this);
-          delete this.affairs[key];
-          return true;
-        }
-        return false;
-      }
-
-      if (this.affairs[mark]) {
-        this.affairs[mark].dispose.call(this);
-        delete this.affairs[mark];
+    public stopAffair(key: AffairKey): boolean {
+      if (this.affairs[key]) {
+        this.affairs[key].dispose.call(this);
+        delete this.affairs[key];
         return true;
       }
       return false;
