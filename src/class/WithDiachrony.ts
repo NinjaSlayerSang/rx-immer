@@ -10,7 +10,7 @@ export interface Flow {
   patchesTuple: PatchesTuple;
 }
 
-export interface Diachrony<T extends Objectish> {
+export interface Diachrony<T extends Objectish = any> {
   anchor: Immutable<T>;
   anchorTimeStamp: number;
   flows: Flow[];
@@ -18,18 +18,18 @@ export interface Diachrony<T extends Objectish> {
   archiveTimeStamp: number;
 }
 
-export interface IWithDiachrony<T> {
+export interface IWithDiachrony {
   withDiachrony: true;
 
   size$: BehaviorSubject<number>;
 
   size(): number;
 
-  archive(): Diachrony<T>;
+  archive(): Diachrony;
 }
 
 export function generateWithDiachrony(Cls: typeof Base): any {
-  return class<T> extends Cls<T> implements IWithDiachrony<T> {
+  return class<T> extends Cls<T> implements IWithDiachrony {
     private uuid = -1;
     private anchor: Immutable<T>;
     private anchorTimeStamp: number;

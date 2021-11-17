@@ -3,8 +3,14 @@ import { castImmutable, Draft, Immutable, produceWithPatches } from 'immer';
 import { get, isObjectLike } from 'lodash';
 
 import type { Objectish, Patches, PatchesTuple, Path } from '../type';
-import { isCommitValid, isContained } from '../utils';
-import { NonObjectishError } from '../const';
+import {
+  invalidPathToObjectishError,
+  invalidPathToValueError,
+  isCommitValid,
+  isContained,
+  trimPath,
+  Wrapper,
+} from '../utils';
 
 export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
@@ -17,6 +23,8 @@ export interface IBase<T extends Objectish> {
     recipe: (draft: Draft<V>) => void,
     targetPath: Path
   ): void;
+
+  commitValue<V = any>(recipe: (wrapper: Wrapper<V>) => void, targetPath: Path);
 
   readonly destroyed: boolean;
 
@@ -60,9 +68,10 @@ export class Base<T extends Objectish> implements IBase<T> {
     const optionalRecipe =
       targetPath === undefined
         ? recipe
-        : (draft: any) => {
+        : (draft) => {
             const target = get(draft, targetPath);
-            if (!isObjectLike(target)) throw NonObjectishError;
+            if (!isObjectLike(target))
+              throw invalidPathToObjectishError(targetPath);
             recipe(target);
           };
     let record: PatchesTuple;
@@ -76,6 +85,29 @@ export class Base<T extends Objectish> implements IBase<T> {
       this.patchesTuple$.next(record);
       this.onCommit(record);
     }
+  }
+
+  public commitValue<V>(
+    recipe: (wrapper: Wrapper<V>) => void,
+    targetPath: Path
+  ) {
+    const upperPath = trimPath(targetPath);
+    const self = upperPath.pop();
+
+    if (self === undefined) throw invalidPathToValueError(targetPath);
+
+    const wrappedRecipe = (upper) => {
+      const wrapper = new Wrapper(
+        () => upper[self],
+        (value) => {
+          upper[self] = value;
+        }
+      );
+
+      recipe(wrapper);
+    };
+
+    this.commit(wrappedRecipe, upperPath);
   }
 
   public destroy() {

@@ -1,10 +1,13 @@
-import { toPath } from 'lodash';
+import { trimPath } from '../public';
 
 import type { PatchesTuple, Path, TrimmedPath } from '../../type';
 
+export * from './Wrapper';
+export * from './error';
+
 export const isContained =
   (rawListenPath: Path) => (targetPath: TrimmedPath) => {
-    const listenPath = toPath(rawListenPath);
+    const listenPath = trimPath(rawListenPath);
     return listenPath.length <= targetPath.length
       ? listenPath.every((value, index) => value == targetPath[index])
       : targetPath.every((value, index) => value == listenPath[index]);
