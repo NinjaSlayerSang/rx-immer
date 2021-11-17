@@ -7,12 +7,12 @@ import type { Diachrony, Flow } from './WithDiachrony';
 import type { Path } from '../type';
 import { reversePatchesTuple } from '../utils';
 
-export interface IReplayMode<T> {
+export interface IReplayMode {
   replayMode: true;
 
   timeRange$: BehaviorSubject<[number, number]>;
 
-  setDiachrony(diachrony: Diachrony<T>): void;
+  setDiachrony(diachrony: Diachrony): void;
 
   getTimeRange(): [number, number];
 
@@ -22,7 +22,7 @@ export interface IReplayMode<T> {
 }
 
 export function generateReplayMode(Cls: typeof Base): any {
-  return class<T> extends Cls<T> implements IReplayMode<T> {
+  return class<T> extends Cls<T> implements IReplayMode {
     private initialTimeStamp: number;
     private terminalTimeStamp: number;
     private flows: Flow[] = [];
@@ -117,8 +117,8 @@ export function generateReplayMode(Cls: typeof Base): any {
       return this.flows.length;
     }
 
-    public setDiachrony(diachrony: Diachrony<T>) {
-      this.store = castImmutable(diachrony.anchor as T);
+    public setDiachrony(diachrony: Diachrony) {
+      this.store = castImmutable(diachrony.anchor);
       this.flows = diachrony.flows.sort((a, b) => a.uid - b.uid);
       this.cursor = 0;
       this.initialTimeStamp = diachrony.anchorTimeStamp;
