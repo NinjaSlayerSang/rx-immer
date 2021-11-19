@@ -4,14 +4,6 @@ import type { Base } from './Base';
 import type { Path, TrimmedPath } from '../type';
 import { trimPath } from '../utils';
 
-export type Sub<C, S = void, R = C> = {
-  sub<T = any>(relativePath: Path): Sub<T, Sub<C, S, R>, R>;
-
-  sup(): S;
-
-  root(): Sub<R>;
-} & C;
-
 export interface ISub {
   readonly path: TrimmedPath;
 
