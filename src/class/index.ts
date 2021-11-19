@@ -1,15 +1,14 @@
 import { defaultsDeep } from 'lodash';
 
-import type { Config, DeepPartial, Objectish } from '../type';
+import type { Config, DeepPartial, Objectish, Path } from '../type';
 import { Base, IBase } from './Base';
-import { generateSub, ISub, Sub } from './Sub';
+import { generateSub, ISub } from './Sub';
 import { generateFacility, IFacility } from './Facility';
 import { generateWithHistory, IWithHistory } from './WithHistory';
 import { generateWithDiachrony, IWithDiachrony } from './WithDiachrony';
 import { generateReplayMode, IReplayMode } from './ReplayMode';
 import { DEFAULT_CONFIG } from '../const';
 
-export type { Sub } from './Sub';
 export type { Diachrony } from './WithDiachrony';
 
 export interface IConfig {
@@ -23,6 +22,14 @@ export type Plain<T> = IBase<T> &
   Partial<IWithHistory> &
   Partial<IWithDiachrony> &
   Partial<IReplayMode>;
+
+type Sub<C, S = void, R = C> = {
+  sub<T = any>(relativePath: Path): Sub<Plain<T>, Sub<C, S, R>, R>;
+
+  sup(): S;
+
+  root(): Sub<R>;
+} & C;
 
 export type RxImmer<T extends Objectish> = Sub<Plain<T>>;
 

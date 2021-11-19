@@ -5,6 +5,9 @@ import type { PatchesTuple, Path, TrimmedPath } from '../../type';
 export * from './Wrapper';
 export * from './error';
 
+export const isEmptyPath = (path: Path) =>
+  typeof path !== 'number' && path.length === 0;
+
 export const isContained =
   (rawListenPath: Path) => (targetPath: TrimmedPath) => {
     const listenPath = trimPath(rawListenPath);

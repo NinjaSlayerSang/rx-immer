@@ -17,6 +17,8 @@ export interface IFacility {
 
   stopAffair(key: AffairKey): boolean;
 
+  hasAffair(key: AffairKey): boolean;
+
   showAffairs(): AffairKey[];
 }
 
@@ -63,6 +65,10 @@ export function generateFacility(Cls: typeof Base): any {
         return true;
       }
       return false;
+    }
+
+    public hasAffair(key: AffairKey): boolean {
+      return !!this.affairs[key];
     }
 
     public showAffairs() {

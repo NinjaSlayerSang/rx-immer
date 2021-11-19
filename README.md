@@ -10,12 +10,15 @@
   - [创建实例](#创建实例)
   - [监听状态改变](#监听状态改变)
   - [修改状态](#修改状态)
+  - [创建子实例(v0.2.x新增)](#创建子实例v02x新增)
   - [销毁实例](#销毁实例)
 - [在React项目中使用](#在react项目中使用)
 - [扩展功能](#扩展功能)
   - [操作记录栈](#操作记录栈)
   - [历史归档及场景还原](#历史归档及场景还原)
+  - [添加事务](#添加事务)
 - [配置](#配置)
+- [工具函数](#工具函数)
 
 ## 背景
 
@@ -185,6 +188,15 @@ store.commit((a0) => {
 
 同样，在*TypeScript*中，`commit<T>`作为泛型方法，可以接受一个类型参数，指示修改目标的类型信息。
 
+*v0.2.0新增: 提供commitValue方法，可对非引用类型的值类型数据进行修改，commitValue的recipe闭包传入一个包裹类型，通过直接访问包裹类型的value属性读写路径指向的值类型数据：*
+
+```javascript
+store.commitValue((wrappedC) => {
+  console.log(wrappedC.value);
+  wrappedC.value = 1;
+}, 'a[0].b.c')
+```
+
 *高级：请保证recipe函数同步返回时便完成本次提交的所有修改，传入recipe函数的代理state**不应该**被**闭包**捕获，因为在recipe函数返回之后，对于state的任何修改都**不再会生效**。例如state被闭包捕获传入某个异步回调中，在异步调用发生时，recipe函数已经执行完毕，修改事务已经提交，此时对于state的修改将不再有效果。*
 
 ```javascript
@@ -200,6 +212,44 @@ store.commit((state) => {
   });
 }); // 错误！state被传入异步回调中，修改无法生效！
 ```
+
+### 创建子实例(v0.2.x新增)
+
+可以通过`sub`方法创建实例的子实例：
+
+```typescript
+const subStore = store.sub<RxImmer<{ c: number }>>('a[0].b');
+```
+
+子实例接受一个路径值，代表该子实例将父实例下的该路径作为它的根路径：
+
+```typescript
+store.observe('a[0].b.c');
+subStore.observe('c'); // 两者等效
+
+store.commit((b) => { b.c = 1; }, 'a[0].b');
+subStore.commit((b) => { b.c = 1; }); // 两者等效
+```
+
+同时，子实例也可创建更下一层的子实例：
+
+```typescript
+const subSubStore = subStore.sub<RxImmer<any>>('path');
+```
+
+子实例可以通过`sup`方法获得上一层实例：
+
+```typescript
+const store = subStore.sup();
+```
+
+也可以通过`root`方法获得最上层的根实例：
+
+```typescript
+const store = subSubStore.root();
+```
+
+*使用TypeScript时，实例与子实例之间有递归嵌套的泛型系统，可帮助编译器智能判定sup与root方法返回的上层实例的具体类型，与之对应的，需要在调用sub<T>方法产生子实例时显式指定子实例的状态类型T。*
 
 ### 销毁实例
 
@@ -294,6 +344,31 @@ store.replay?.(timeStamp); // 将播放指针移动到某个时间戳
 
 *在演示项目中有详细的使用演示，并且演示了如何使用rx-immer管理antd的表单组件状态：只需轻松添加两行代码即可将现有的antd表单组件纳入rx-immer框架管理，给表单添加用户操作撤销、重做，记录与重播用户表单操作轨迹的功能。*
 
+### 添加事务
+
+向rx-immer实例上注册事务，通常用于在实例初始化时添加常驻的监听事件。事务按照自定义的key管理，可手动停止，或者在实例destroy时自动停止。
+
+```javascript
+// 开启事务
+const affairKey = store.startAffair(function() { // 如果在此处不使用箭头函数，则可以在函数体内通过this取到实例
+  const subscription = this.observe().subscribe(() => {
+    // ...监听逻辑
+  })
+
+  // 返回用于清理监听的闭包
+  return () => {
+    subscription.unsubscribe()
+  }
+}, 'custom affair key'); // 可提供一个自定义的事务唯一key，用于关闭或重启事务(再次添加相同key的事务时会自动停止上一次)；
+// 如不指定key，则会自动产生一个递增的key；key会作为startAffair方法的返回值。
+
+store.stopAffair(affairKey); // 按照事务key停止事务，返回一个布尔值，是否成功停止
+
+if (store.hasAffair(affairKey)) { /* ... */ } // 是否存在指定key的事务
+
+const affairKeys = store.showAffairs(); // 获取所有运行中的事务key
+```
+
 ## 配置
 
 ```typescript
@@ -317,4 +392,24 @@ const defaultConfig: Config = {
   diachrony: false, // 默认关闭历史记录归档功能
   replay: false, // 默认关闭场景还原模式
 };
+```
+
+## 工具函数
+
+rx-immer封装了多个工具函数，帮助完成一些通用的功能：
+
+```javascript
+// 处理路径格式
+
+trimPath('a[0].b.c') === ['a', 0, 'b', 'c']
+
+assemblePath(['a', 0, 'b', 'c']) === 'a[0].b.c'
+
+// 对象的深层更新
+
+updateDeep(target, source) // 根据source对象递归地更新target，一般用在commit闭包中
+
+store.commit((draft) => {
+  updateDeep(draft, source); // 根据source中地实际结构与值更新state数据，自动依据各层的对象或数组结构对原数据增删改，并且只对增量进行修改
+})
 ```

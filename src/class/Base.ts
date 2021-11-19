@@ -8,6 +8,7 @@ import {
   invalidPathToValueError,
   isCommitValid,
   isContained,
+  isEmptyPath,
   trimPath,
   Wrapper,
 } from '../utils';
@@ -66,7 +67,7 @@ export class Base<T extends Objectish> implements IBase<T> {
 
   public commit(recipe: (draft: any) => void, targetPath?: Path) {
     const optionalRecipe =
-      targetPath === undefined
+      targetPath === undefined || isEmptyPath(targetPath)
         ? recipe
         : (draft) => {
             const target = get(draft, targetPath);
