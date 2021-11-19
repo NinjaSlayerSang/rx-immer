@@ -10,7 +10,7 @@
   - [创建实例](#创建实例)
   - [监听状态改变](#监听状态改变)
   - [修改状态](#修改状态)
-  - [创建子实例(v0.2.x新增)](#创建子实例v02x新增)
+  - [创建子实例](#创建子实例)
   - [销毁实例](#销毁实例)
 - [在React项目中使用](#在react项目中使用)
 - [扩展功能](#扩展功能)
@@ -213,17 +213,17 @@ store.commit((state) => {
 }); // 错误！state被传入异步回调中，修改无法生效！
 ```
 
-### 创建子实例(v0.2.x新增)
+### 创建子实例
 
-可以通过`sub`方法创建实例的子实例：
+v0.2.0新增：可以通过`sub`方法创建实例的子实例：
 
-```typescript
-const subStore = store.sub<RxImmer<{ c: number }>>('a[0].b');
+```javascript
+const subStore = store.sub('a[0].b');
 ```
 
-子实例接受一个路径值，代表该子实例将父实例下的该路径作为它的根路径：
+子实例接受一个路径值，为该子实例相对于父实例的相对路径：
 
-```typescript
+```javascript
 store.observe('a[0].b.c');
 subStore.observe('c'); // 两者等效
 
@@ -231,25 +231,33 @@ store.commit((b) => { b.c = 1; }, 'a[0].b');
 subStore.commit((b) => { b.c = 1; }); // 两者等效
 ```
 
-同时，子实例也可创建更下一层的子实例：
+同时，子实例也能创建下一层的子实例：
 
-```typescript
-const subSubStore = subStore.sub<RxImmer<any>>('path');
+```javascript
+const subSubStore = subStore.sub('path');
 ```
 
-子实例可以通过`sup`方法获得上一层实例：
+子实例可以通过`sup`方法获得上一层的父实例：
 
-```typescript
+```javascript
 const store = subStore.sup();
 ```
 
 也可以通过`root`方法获得最上层的根实例：
 
-```typescript
+```javascript
 const store = subSubStore.root();
 ```
 
-*使用TypeScript时，实例与子实例之间有递归嵌套的泛型系统，可帮助编译器智能判定sup与root方法返回的上层实例的具体类型，与之对应的，需要在调用sub<T>方法产生子实例时显式指定子实例的状态类型T。*
+通过isSub与path字段查询实例是否为子实例以及相对于父级的路径：
+
+```javascript
+store.isSub // boolean
+
+store.path // eg: ['a', 0, 'b']
+```
+
+使用TypeScript时，实例与子实例之间有递归嵌套的泛型系统，可帮助编译器智能判定sup与root方法返回的上层实例的具体类型，与之对应的，需要在调用`sub<T>`方法产生子实例时显式指定子实例的状态类型T。
 
 ### 销毁实例
 
