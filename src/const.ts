@@ -1,6 +1,9 @@
 import type { Config, HistoryConfig } from './type';
 
+export { immerable, nothing } from 'immer';
+
 // Default Config
+
 export const DEFAULT_CONFIG_HISTORY: HistoryConfig = {
   capacity: Number.POSITIVE_INFINITY,
   bufferDebounce: 0,
