@@ -91,7 +91,7 @@ export function generateWithHistory(
       if (records) {
         this.recycle.push(records);
         records.reduceRight((_, record) => {
-          this.store = applyPatches(this.store, record[1]);
+          this.state = applyPatches(this.state, record[1]);
           this.patchesTuple$.next(reversePatchesTuple(record));
           return undefined;
         }, undefined);
@@ -105,7 +105,7 @@ export function generateWithHistory(
       if (records) {
         this.history.push(records);
         records.forEach((record) => {
-          this.store = applyPatches(this.store, record[0]);
+          this.state = applyPatches(this.state, record[0]);
           this.patchesTuple$.next(record);
         });
       }
