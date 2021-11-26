@@ -1,11 +1,11 @@
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { applyPatches, castImmutable } from 'immer';
-import { get, range } from 'lodash';
+import { range } from 'lodash';
 
 import type { Base } from './Base';
 import type { Diachrony, Flow } from './WithDiachrony';
 import type { Path } from '../type';
-import { reversePatchesTuple } from '../utils';
+import { getByPath, reversePatchesTuple } from '../utils';
 
 export interface IReplayMode {
   replayMode: true;
@@ -50,11 +50,7 @@ export function generateReplayMode(Cls: typeof Base): any {
 
       return merge(
         observe,
-        this.timeRange$.pipe(
-          map(() =>
-            listenPath === undefined ? this.store : get(this.store, listenPath)
-          )
-        )
+        this.timeRange$.pipe(map(() => getByPath(this.state, listenPath)))
       );
     }
 
@@ -70,7 +66,7 @@ export function generateReplayMode(Cls: typeof Base): any {
 
     private shiftRight() {
       const { patchesTuple } = this.flows[this.cursor];
-      this.store = applyPatches(this.store, patchesTuple[0]);
+      this.state = applyPatches(this.state, patchesTuple[0]);
       this.patchesTuple$.next(patchesTuple);
       this.cursor += 1;
     }
@@ -78,7 +74,7 @@ export function generateReplayMode(Cls: typeof Base): any {
     private shiftLeft() {
       this.cursor -= 1;
       const { patchesTuple } = this.flows[this.cursor];
-      this.store = applyPatches(this.store, patchesTuple[1]);
+      this.state = applyPatches(this.state, patchesTuple[1]);
       this.patchesTuple$.next(reversePatchesTuple(patchesTuple));
     }
 
@@ -118,7 +114,7 @@ export function generateReplayMode(Cls: typeof Base): any {
     }
 
     public setDiachrony(diachrony: Diachrony) {
-      this.store = castImmutable(diachrony.anchor);
+      this.state = castImmutable(diachrony.anchor);
       this.flows = diachrony.flows.sort((a, b) => a.uid - b.uid);
       this.cursor = 0;
       this.initialTimeStamp = diachrony.anchorTimeStamp;

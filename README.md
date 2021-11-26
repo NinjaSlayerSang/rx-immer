@@ -19,6 +19,9 @@
   - [添加事务](#添加事务)
 - [配置](#配置)
 - [工具函数](#工具函数)
+- [F&Q](#fq)
+  - [我该如何书写commit的recipe函数以完成对状态的更新？](#我该如何书写commit的recipe函数以完成对状态的更新)
+  - [只能在状态对象中包含原生Object，Array，Map与Set吗？是否能使用自定义的类？](#只能在状态对象中包含原生objectarraymap与set吗是否能使用自定义的类)
 
 ## 背景
 
@@ -162,7 +165,7 @@ store.commit((b) => {
 }, 'a[0].b');
 ```
 
-**注意：***targetPath*所指向的值必须是**引用类型**（如Object、Array），并且所有赋值操作前**不能**对代理对象**解引用**：
+**注意：***~~targetPath*所指向的值必须是**引用类型**（如Object、Array）~~（已更新了新特性，详见下文），并且所有赋值操作前**不能**对代理对象**解引用**：
 
 ```javascript
 store.commit((c) => {
@@ -188,13 +191,49 @@ store.commit((a0) => {
 
 同样，在*TypeScript*中，`commit<T>`作为泛型方法，可以接受一个类型参数，指示修改目标的类型信息。
 
-*v0.2.0新增: 提供commitValue方法，可对非引用类型的值类型数据进行修改，commitValue的recipe闭包传入一个包裹类型，通过直接访问包裹类型的value属性读写路径指向的值类型数据：*
+~~*v0.2.0新增: 提供commitValue方法，可对非引用类型的值类型数据进行修改，commitValue的recipe闭包传入一个包裹类型，通过直接访问包裹类型的value属性读写路径指向的值类型数据。*~~ **已移除**
+
+v0.3.0: commit方法接受一个返回值，代表直接修改路径指向的数据。注意保证上层路径指向一个引用类型，否则会抛出错误。
 
 ```javascript
-store.commitValue((wrappedC) => {
-  console.log(wrappedC.value);
-  wrappedC.value = 1;
-}, 'a[0].b.c')
+store.commit((c) => {
+  return 1;
+}, 'a[0].b.c');
+```
+
+在不指定路径时，即对顶层state进行修改时，也可以返回值，此时将直接修改整个state。注意，对顶层state的一次commit中，要么对传入的state代理进行修改，要么返回一个新的state值，不能先进行修改，然后返回一个新的state值（使用返回值给出一个新的状态意味着之前所有的修改均无效，immer框架为避免歧义，在这种场景下会抛出错误）。
+
+```javascript
+store.commit((state) => {
+  state.a[0].b.c = 1; // 允许，只对代理进行修改
+});
+
+store.commit(() => {
+  return { a: [{ b: { c: 1 } }] }; // 允许，只返回了新的状态值
+});
+
+store.commit((state) => {
+  state.a[0].b.c = 1;
+  return { a: [{ b: { c: 1 } }] }; // 报错！既进行了修改，又返回了新的状态值
+});
+```
+
+如果想要将该路径的值设为undefined，该如何操作？
+
+```javascript
+store.commit(() => {
+  return undefined; // 这是无效的，因为无法判断函数是显式返回undefined或者隐式结束
+});
+```
+
+为此，immer框架专门提供了一个特征的实例`nothing`，以显式的表示返回undefined值：
+
+```javascript
+import { nothing } from 'rx-immer';
+
+store.commit(() => {
+  return nothing; // 代表将state设为undefined(如在TypeScript中使用，state类型必须为可空类型T | undefined，否则会提示类型错误)
+});
 ```
 
 *高级：请保证recipe函数同步返回时便完成本次提交的所有修改，传入recipe函数的代理state**不应该**被**闭包**捕获，因为在recipe函数返回之后，对于state的任何修改都**不再会生效**。例如state被闭包捕获传入某个异步回调中，在异步调用发生时，recipe函数已经执行完毕，修改事务已经提交，此时对于state的修改将不再有效果。*
@@ -212,6 +251,17 @@ store.commit((state) => {
   });
 }); // 错误！state被传入异步回调中，修改无法生效！
 ```
+
+*v0.3.0新增：提供了专门的commitAsync方法以完成异步的修改。commitAsync接受的`recipe`是一个async function：*
+
+```javascript
+store.commitAsync(async (state) => {
+  const res = await api();
+  state.data = res.data;
+});
+```
+
+*ps：未来版本会考虑将commit方法与commitAsync方法合并统一处理同步与异步recipe。*
 
 ### 创建子实例
 
@@ -308,7 +358,7 @@ rx-immer内置了一个实验性的扩展功能，能够记录下应用状态的
 const store = create({}, { diachrony: true }); // 配置开启历史归档功能
 
 const size = store.size?.(); // 查询当前历史记录的长度
-const size = store.useDiachronySize?.() // 在React中，可将历史记录长度状态绑定到组件状态中
+const size = store.useDiachronySize?.(); // 在React中，可将历史记录长度状态绑定到组件状态中
 
 const diachrony = store.archive?.(); // 将当前历史记录归档返回，并重置内部历史记录表，开启下一段记录
 ```
@@ -361,11 +411,11 @@ store.replay?.(timeStamp); // 将播放指针移动到某个时间戳
 const affairKey = store.startAffair(function() { // 如果在此处不使用箭头函数，则可以在函数体内通过this取到实例
   const subscription = this.observe().subscribe(() => {
     // ...监听逻辑
-  })
+  });
 
   // 返回用于清理监听的闭包
   return () => {
-    subscription.unsubscribe()
+    subscription.unsubscribe();
   }
 }, 'custom affair key'); // 可提供一个自定义的事务唯一key，用于关闭或重启事务(再次添加相同key的事务时会自动停止上一次)；
 // 如不指定key，则会自动产生一个递增的key；key会作为startAffair方法的返回值。
@@ -421,3 +471,30 @@ store.commit((draft) => {
   updateDeep(draft, source); // 根据source中地实际结构与值更新state数据，自动依据各层的对象或数组结构对原数据增删改，并且只对增量进行修改
 })
 ```
+
+## F&Q
+
+### 我该如何书写commit的recipe函数以完成对状态的更新？
+
+immer框架提供了与mobx等框架相同的**直观式**更新状态对象的模式，在例如写入对象的属性值等场景下通俗而易于理解，但依旧会有不熟悉的使用者会在删除属性、修改数组等场景感到疑惑。
+为了以最佳实践的使用相关功能，immer框架官方给出了[Update Patterns(更新模式)](https://immerjs.github.io/immer/update-patterns)范例。
+
+### 只能在状态对象中包含原生Object，Array，Map与Set吗？是否能使用自定义的类？
+
+答案是可以的。通过为自定义类添加[symbol属性](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol)`[immerable]`，可将自定义类纳入自动代理中：
+
+```javascript
+import { immerable } from "rx-immer";
+
+class Foo {
+    [immerable] = true; // 方式 1
+
+    constructor() {
+        this[immerable] = true; // 方式 2
+    }
+}
+
+Foo[immerable] = true; // 方式 3
+```
+
+对象的具体行为模式参见[文档](https://immerjs.github.io/immer/complex-objects#semantics-in-detail)。

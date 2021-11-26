@@ -1,8 +1,6 @@
-import { get } from 'lodash';
-
 import type { Base } from './Base';
 import type { Path, TrimmedPath } from '../type';
-import { trimPath } from '../utils';
+import { getByPath, trimPath } from '../utils';
 
 export interface ISub {
   readonly path: TrimmedPath;
@@ -25,16 +23,19 @@ export function generateSub(Cls: typeof Base): any {
         path: trimPath(relativePath),
         isSub: true,
         value() {
-          return get(this.super.value(), this.path);
+          return getByPath(this.super.value(), this.path);
         },
         observe(listenPath) {
-          return this.super.observe(this.path.concat(listenPath ?? []));
+          return this.super.observe(this.path.concat(trimPath(listenPath)));
         },
         commit(recipe, targetPath) {
-          this.super.commit(recipe, this.path.concat(targetPath ?? []));
+          this.super.commit(recipe, this.path.concat(trimPath(targetPath)));
         },
-        commitValue(recipe, targetPath) {
-          this.super.commitValue(recipe, this.path.concat(targetPath));
+        async commitAsync(recipe, targetPath) {
+          return this.super.commitAsync(
+            recipe,
+            this.path.concat(trimPath(targetPath))
+          );
         },
       });
     }
