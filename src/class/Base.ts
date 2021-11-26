@@ -6,10 +6,9 @@ import produce, {
   nothing,
   produceWithPatches,
 } from 'immer';
-import { Nothing } from 'immer/dist/internal';
 import { isObjectLike } from 'lodash';
 
-import type { Objectish, PatchesTuple, Path } from '../type';
+import type { Nothing, Objectish, PatchesTuple, Path } from '../type';
 import {
   getByPath,
   invalidPathToObjectishError,

@@ -1,6 +1,6 @@
 import type { Patch } from 'immer';
 
-export { Immutable, Nothing, Objectish } from 'immer/dist/internal';
+export type { Immutable, Nothing, Objectish } from 'immer/dist/internal';
 
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
