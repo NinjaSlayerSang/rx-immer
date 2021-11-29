@@ -27,6 +27,7 @@ declare type ValidRecipeReturnType<State> =
 
 export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
+  value<V = any>(path: Path): Immutable<V>;
 
   observe(): Observable<Immutable<T>>;
   observe<V = any>(listenPath: Path): Observable<Immutable<V>>;
@@ -68,8 +69,8 @@ export class Base<T extends Objectish> implements IBase<T> {
   }
 
   // implements
-  public value(): Immutable<T> {
-    return this.state;
+  public value(path?: Path) {
+    return getByPath(this.state, path);
   }
 
   public observe(listenPath?: Path) {
