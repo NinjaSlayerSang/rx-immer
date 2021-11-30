@@ -9,6 +9,7 @@
   - [在项目中引入](#在项目中引入)
   - [创建实例](#创建实例)
   - [监听状态改变](#监听状态改变)
+  - [直接获取状态值](#直接获取状态值)
   - [修改状态](#修改状态)
   - [创建子实例](#创建子实例)
   - [销毁实例](#销毁实例)
@@ -146,6 +147,14 @@ const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
 #### 在React项目中
 
 rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state。并且，在React组件卸载时，绑定的监听也会自动解除。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%B0%86%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A%E5%88%B0%E7%BB%84%E4%BB%B6)。
+
+### 直接获取状态值
+
+```typescript
+const state = store.value();
+
+const c = store.value<number>('a[0].b.c'); // version >= 0.3.1
+```
 
 ### 修改状态
 

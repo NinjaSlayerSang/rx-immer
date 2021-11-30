@@ -1,6 +1,6 @@
 import type { Base } from './Base';
 import type { Path, TrimmedPath } from '../type';
-import { getByPath, trimPath } from '../utils';
+import { trimPath } from '../utils';
 
 export interface ISub {
   readonly path: TrimmedPath;
@@ -22,8 +22,8 @@ export function generateSub(Cls: typeof Base): any {
         super: this,
         path: trimPath(relativePath),
         isSub: true,
-        value() {
-          return getByPath(this.super.value(), this.path);
+        value(path) {
+          return this.super.value(this.path.concat(trimPath(path)));
         },
         observe(listenPath) {
           return this.super.observe(this.path.concat(trimPath(listenPath)));
