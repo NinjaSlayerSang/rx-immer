@@ -19,11 +19,14 @@ import {
   trimPath,
 } from '../utils';
 
-declare type ValidRecipeReturnType<State> =
+type ValidRecipeReturnType<State> =
   | State
   | void
   | undefined
   | (State extends undefined ? Nothing : never);
+
+type Recipe<T> = (draft: Draft<T>) => ValidRecipeReturnType<T>;
+type AsyncRecipe<T> = (draft: Draft<T>) => Promise<ValidRecipeReturnType<T>>;
 
 export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
@@ -32,19 +35,11 @@ export interface IBase<T extends Objectish> {
   observe(): Observable<Immutable<T>>;
   observe<V = any>(listenPath: Path): Observable<Immutable<V>>;
 
-  commit(recipe: (draft: Draft<T>) => ValidRecipeReturnType<T>): void;
-  commit<V>(
-    recipe: (draft: Draft<V>) => ValidRecipeReturnType<T>,
-    targetPath: Path
-  ): void;
+  commit(recipe: Recipe<T>): void;
+  commit<V = any>(recipe: Recipe<V>, targetPath: Path): void;
 
-  commitAsync(
-    recipe: (draft: Draft<T>) => Promise<ValidRecipeReturnType<T>>
-  ): Promise<void>;
-  commitAsync<V>(
-    recipe: (draft: Draft<V>) => Promise<ValidRecipeReturnType<V>>,
-    targetPath: Path
-  ): Promise<void>;
+  commitAsync(recipe: AsyncRecipe<T>): Promise<void>;
+  commitAsync<V = any>(recipe: AsyncRecipe<V>, targetPath: Path): Promise<void>;
 
   readonly destroyed: boolean;
 
