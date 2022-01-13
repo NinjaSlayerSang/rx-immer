@@ -3,7 +3,9 @@ import { DEFAULT_CONFIG } from '../src/const';
 
 function testBaseIntegrity<T>(store: RxImmer<T>) {
   expect(store.value).toBeDefined();
+  expect(store.find).toBeDefined();
   expect(store.observe).toBeDefined();
+  expect(store.query).toBeDefined();
   expect(store.commit).toBeDefined();
   expect(store.commitAsync).toBeDefined();
 

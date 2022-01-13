@@ -144,6 +144,16 @@ const subscription = store.observe<number>('a[0].b.c').subscribe((c) => {
 
 **注意：**在监听使用结束后，需要执行`subscription.unsubscribe()`解除监听以释放资源。
 
+v0.4.0新增：新增了`query`实例方法，接受一个*查询字符串*参数，监听在状态对象中使用JSONPath查询字符串检索出的结果。
+
+```typescript
+const subscription = store.query<Book>('$..book[?(@.price<10)]').subscribe((result) => {
+  console.log(result.length, result); // 类型为Book[]，所有price小于10的Book对象
+});
+```
+
+JSONPath具体语法与示例见相关[文档](https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples)。
+
 #### 在React项目中
 
 rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state。并且，在React组件卸载时，绑定的监听也会自动解除。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%B0%86%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A%E5%88%B0%E7%BB%84%E4%BB%B6)。
@@ -155,6 +165,14 @@ const state = store.value();
 
 const c = store.value<number>('a[0].b.c'); // version >= 0.3.1
 ```
+
+v0.4.0新增：新增了`find`实例方法，接受一个*查询字符串*参数，返回在状态对象中使用JSONPath查询字符串检索出的结果集合。
+
+```typescript
+const result = store.find<Book>('$..book[?(@.price<10)]'); // 类型为Book[]，所有price小于10的Book对象
+```
+
+JSONPath具体语法与示例见相关[文档](https://github.com/JSONPath-Plus/JSONPath#syntax-through-examples)。
 
 ### 修改状态
 
