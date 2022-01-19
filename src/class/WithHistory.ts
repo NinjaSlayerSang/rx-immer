@@ -15,6 +15,8 @@ export interface IWithHistory {
   revert(): void;
 
   recover(): void;
+
+  reset(): void;
 }
 
 export function generateWithHistory(
@@ -93,8 +95,8 @@ export function generateWithHistory(
         records.reduceRight((_, record) => {
           this.state = applyPatches(this.state, record[1]);
           this.patchesTuple$.next(reversePatchesTuple(record));
-          return undefined;
-        }, undefined);
+          return _;
+        });
       }
 
       this.onRoamStatusChange();
@@ -109,6 +111,13 @@ export function generateWithHistory(
           this.patchesTuple$.next(record);
         });
       }
+
+      this.onRoamStatusChange();
+    }
+
+    public reset() {
+      this.history = [];
+      this.recycle = [];
 
       this.onRoamStatusChange();
     }

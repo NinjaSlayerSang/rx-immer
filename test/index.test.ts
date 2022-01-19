@@ -29,6 +29,7 @@ function testHistoryIntegrity<T>(store: RxImmer<T>) {
   expect(store.getRoamStatus?.()).toEqual([0, 0]);
   expect(store.revert).toBeDefined();
   expect(store.recover).toBeDefined();
+  expect(store.reset).toBeDefined();
 }
 
 function testDiachronyIntegrity<T>(store: RxImmer<T>) {
