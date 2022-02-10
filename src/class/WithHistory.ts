@@ -1,14 +1,16 @@
-import { BehaviorSubject, buffer, debounceTime, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { applyPatches } from 'immer';
 
 import type { Base } from './Base';
 import type { HistoryConfig, PatchesTuple, PatchesTupleGroup } from '../type';
-import { reversePatchesTuple } from '../utils';
+import { bufferDebounceTime, reversePatchesTuple } from '../utils';
 
 export interface IWithHistory {
   withHistory: true;
 
   roamStatus$: BehaviorSubject<[number, number]>;
+
+  setHistoryConfig(config: Partial<HistoryConfig>): HistoryConfig;
 
   getRoamStatus(): [number, number];
 
@@ -30,6 +32,7 @@ export function generateWithHistory(
     private history: PatchesTupleGroup[] = [];
     private recycle: PatchesTupleGroup[] = [];
     private historyBufferPool$ = new Subject<PatchesTuple>();
+    private recordSubscription: Subscription;
 
     public withHistory: true = true;
 
@@ -38,17 +41,7 @@ export function generateWithHistory(
     constructor(initial: T) {
       super(initial);
 
-      this.historyBufferPool$
-        .pipe(
-          buffer(
-            this.historyBufferPool$.pipe(
-              debounceTime(this.historyBufferDebounce)
-            )
-          )
-        )
-        .subscribe((records) => {
-          this.record(records);
-        });
+      this.recordSubscription = this.subscribeRecord();
     }
 
     // inherit
@@ -82,7 +75,33 @@ export function generateWithHistory(
       this.onRoamStatusChange();
     }
 
+    private subscribeRecord() {
+      return this.historyBufferPool$
+        .pipe(bufferDebounceTime(this.historyBufferDebounce))
+        .subscribe((records) => {
+          this.record(records);
+        });
+    }
+
     // implements
+
+    public setHistoryConfig(config: Partial<HistoryConfig>): HistoryConfig {
+      if (config.capacity !== undefined) {
+        this.historyCapacity = config.capacity;
+      }
+
+      if (config.bufferDebounce !== undefined) {
+        this.historyBufferDebounce = config.bufferDebounce;
+
+        this.recordSubscription.unsubscribe();
+        this.recordSubscription = this.subscribeRecord();
+      }
+
+      return {
+        capacity: this.historyCapacity,
+        bufferDebounce: this.historyBufferDebounce,
+      };
+    }
 
     public getRoamStatus(): [number, number] {
       return [this.history.length, this.recycle.length];
