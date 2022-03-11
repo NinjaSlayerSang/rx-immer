@@ -101,7 +101,7 @@ const store = create({ id: 0, name: 'abc', status: true }, { /* 配置项 */ });
 
 #### 在React项目中
 
-rx-immer-react提供了自定义hooks更简单地创建实例。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%88%9B%E5%BB%BA%E5%AE%9E%E4%BE%8B%E5%B9%B6%E6%8C%82%E8%BD%BD%E5%88%B0%E7%BB%84%E4%BB%B6)。
+rx-immer-react提供了自定义hooks更简单地创建实例。具体请参阅[rx-immer-react项目文档]()。
 
 ### 监听状态改变
 
@@ -156,7 +156,7 @@ JSONPath具体语法与示例见相关[文档](https://github.com/JSONPath-Plus/
 
 #### 在React项目中
 
-rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state。并且，在React组件卸载时，绑定的监听也会自动解除。具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react#%E5%B0%86%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A%E5%88%B0%E7%BB%84%E4%BB%B6)。
+rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state。并且，在React组件卸载时，绑定的监听也会自动解除。具体请参阅[rx-immer-react项目文档]()。
 
 ### 直接获取状态值
 
@@ -346,7 +346,7 @@ store.destroy();
 
 ## 在React项目中使用
 
-rx-immer-react包含一系列扩展方便在React项目中使用rx-immer，具体请参阅[rx-immer-react项目文档](http://techdoc.oa.com/pn20090106/rx-immer-react)。
+rx-immer-react包含一系列扩展方便在React项目中使用rx-immer，具体请参阅[rx-immer-react项目文档]()。
 
 ## 扩展功能
 
