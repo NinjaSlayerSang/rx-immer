@@ -56,6 +56,8 @@ export function generateReplayMode(Cls: typeof Base): any {
 
     commit() {}
 
+    async commitAsync() {}
+
     destroy() {
       this.timeRange$.complete();
 
