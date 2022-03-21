@@ -7,7 +7,6 @@ import produce, {
   produceWithPatches,
 } from 'immer';
 import { isObjectLike } from 'lodash';
-import { JSONPath } from 'jsonpath-plus';
 
 import type { Nothing, Objectish, PatchesTuple, Path } from '../type';
 import {
@@ -33,12 +32,8 @@ export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
   value<V = any>(path: Path): Immutable<V>;
 
-  find<V = any>(path: string): Immutable<V[]>;
-
   observe(): Observable<Immutable<T>>;
   observe<V = any>(listenPath: Path): Observable<Immutable<V>>;
-
-  query<V = any>(path: string): Observable<Immutable<V[]>>;
 
   commit(recipe: Recipe<T>): void;
   commit<V = any>(recipe: Recipe<V>, targetPath: Path): void;
@@ -73,10 +68,6 @@ export class Base<T extends Objectish> implements IBase<T> {
     return getByPath(this.state, path);
   }
 
-  public find(path: string) {
-    return JSONPath({ path, json: this.value() });
-  }
-
   public observe(listenPath?: Path) {
     if (isEmptyPath(listenPath)) {
       return this.patchesTuple$.pipe(
@@ -90,10 +81,6 @@ export class Base<T extends Objectish> implements IBase<T> {
       map(() => getByPath(this.state, listenPath)),
       startWith(getByPath(this.state, listenPath))
     );
-  }
-
-  public query(path: string) {
-    return this.observe().pipe(map((json) => JSONPath({ path, json })));
   }
 
   public commit(recipe: (draft: any) => any, targetPath?: Path) {

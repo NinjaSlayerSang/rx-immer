@@ -1,4 +1,4 @@
-import type { Base } from './Base';
+import type { Base } from './_base';
 import type { Path, TrimmedPath } from '../type';
 import { trimPath } from '../utils';
 
