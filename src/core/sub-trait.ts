@@ -1,15 +1,15 @@
-import type { Base } from './_base';
+import type { Base } from './base';
 import type { Path, TrimmedPath } from '../type';
 import { trimPath } from '../utils';
 
-export interface ISub {
+export interface SubTrait {
   readonly path: TrimmedPath;
 
   readonly isSub: boolean;
 }
 
-export function generateSub(Cls: typeof Base): any {
-  return class<T> extends Cls<T> implements ISub {
+export function implementSubTrait(Cls: typeof Base): any {
+  return class<T> extends Cls<T> implements SubTrait {
     private super!: this;
 
     public path: TrimmedPath = [];

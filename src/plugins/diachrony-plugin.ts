@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { applyPatches, castImmutable, Immutable } from 'immer';
 
-import type { Base } from '../core/_base';
+import type { Base } from '../core/base';
 import type { Objectish, PatchesTuple } from '../type';
 
 export interface Flow {
@@ -19,8 +19,6 @@ export interface Diachrony<T extends Objectish = any> {
 }
 
 export interface DiachronyPluginExt {
-  withDiachrony: true;
-
   size$: BehaviorSubject<number>;
 
   size(): number;
@@ -36,8 +34,6 @@ export default {
       private anchor: Immutable<T>;
       private anchorTimeStamp: number;
       private flows: Flow[] = [];
-
-      public withDiachrony: true = true;
 
       public size$ = new BehaviorSubject<number>(0);
 

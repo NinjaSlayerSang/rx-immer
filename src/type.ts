@@ -15,5 +15,6 @@ export type PatchesTupleGroup = PatchesTuple[];
 
 export interface Plugin {
   name: string;
-  generate(Cls: any): any;
+  generate?: (Class: any) => any;
+  runtime?: (instance: any) => any;
 }

@@ -2,14 +2,12 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { applyPatches, castImmutable } from 'immer';
 import { range } from 'lodash';
 
-import type { Base } from '../core/_base';
+import type { Base } from '../core/base';
 import type { Diachrony, Flow } from './diachrony-plugin';
 import type { Path } from '../type';
 import { getByPath, reversePatchesTuple } from '../utils';
 
 export interface ReplayModeExt {
-  replayMode: true;
-
   timeRange$: BehaviorSubject<[number, number]>;
 
   setDiachrony(diachrony: Diachrony): void;
@@ -29,8 +27,6 @@ export default {
       private terminalTimeStamp: number;
       private flows: Flow[] = [];
       private cursor = 0;
-
-      public replayMode: true = true;
 
       public timeRange$: BehaviorSubject<[number, number]>;
 

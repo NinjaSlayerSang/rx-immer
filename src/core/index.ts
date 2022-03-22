@@ -1,34 +1,51 @@
 import type { Objectish, Path, Plugin } from '../type';
-import { Base, IBase } from './_base';
-import { generateSub, ISub } from './_sub';
+import { Base, IBase } from './base';
+import { implementPluginTrait, PluginTrait } from './plugin-trait';
+import { implementSubTrait, SubTrait } from './sub-trait';
+import { PresetPluginsExt, presetPlugins } from '../plugins';
 
-export type Plain<T, E = {}> = IBase<T> & ISub & E;
+type IPlain<T, E> = IBase<T> & PluginTrait & SubTrait & E;
 
-type Sub<C, S = void, R = C> = {
-  sub<T = any>(relativePath: Path): Sub<Plain<T>, Sub<C, S, R>, R>;
+type ISub<C, E, S = void, R = C> = {
+  sub<T = any>(relativePath: Path): ISub<IPlain<T, E>, E, ISub<C, E, S, R>, R>;
 
   sup(): S;
 
-  root(): Sub<R>;
+  root(): ISub<R, E>;
 } & C;
 
-export type RxImmer<T extends Objectish> = Sub<Plain<T>>;
+export type RxImmer<T extends Objectish = any, E extends {} = {}> = ISub<
+  IPlain<T, PresetPluginsExt & E>,
+  PresetPluginsExt & E
+>;
 
-export interface Constructable<T extends Objectish> {
-  new (initial: T): RxImmer<T>;
+export type RxImmerConstructor<T extends Objectish = any, E extends {} = {}> = {
+  new (initial: T): RxImmer<T, E>;
+};
+
+export function factory<T extends Objectish = any, E extends {} = {}>(
+  plugins: Plugin[] = []
+): RxImmerConstructor<T, E> {
+  return presetPlugins
+    .concat(plugins)
+    .reduce(
+      (Cls, plugin) => plugin.generate?.(Cls) ?? Cls,
+      implementSubTrait(implementPluginTrait(Base))
+    );
 }
 
-export function factory<T extends Objectish>(
-  plugins: Plugin[]
-): Constructable<T> {
-  const Cls = plugins.reduce(
-    (cls, plugin) => plugin.generate(cls),
-    generateSub(Base)
-  );
+export function create<T extends Objectish, E extends {} = {}>(
+  initial: T,
+  plugins: Plugin[] = []
+) {
+  const instance = new (factory<T, E>(plugins))(initial);
 
-  return Cls;
-}
+  plugins.forEach((plugin) => {
+    instance.plugins.push({
+      name: plugin.name,
+      runtime: plugin.runtime?.(instance),
+    });
+  });
 
-export function create<T extends Objectish>(initial: T, plugins: Plugin[]) {
-  return new (factory<T>(plugins))(initial);
+  return instance;
 }

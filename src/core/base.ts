@@ -21,8 +21,8 @@ import {
 
 type ValidRecipeReturnType<State> =
   | State
-  | void
   | undefined
+  | void
   | (State extends undefined ? Nothing : never);
 
 type Recipe<T> = (draft: Draft<T>) => ValidRecipeReturnType<T>;
@@ -57,13 +57,19 @@ export class Base<T extends Objectish> implements IBase<T> {
   }
 
   // life cycle
-  protected onCommit(record: PatchesTuple) {
+  protected update(state: Immutable<T>, record: PatchesTuple) {
+    this.state = state;
     if (isPatchesTupleValid(record)) {
-      this.patchesTuple$.next(record);
+      this.broadcast(record);
     }
   }
 
+  protected broadcast(record: PatchesTuple) {
+    this.patchesTuple$.next(record);
+  }
+
   // implements
+
   public value(path?: Path) {
     return getByPath(this.state, path);
   }
@@ -119,8 +125,7 @@ export class Base<T extends Objectish> implements IBase<T> {
 
     const [state, ...record] = produceWithPatches(this.state, optionalRecipe);
 
-    this.state = state;
-    this.onCommit([...record]);
+    this.update(state, [...record]);
   }
 
   public commitAsync(recipe: (draft: any) => Promise<any>, targetPath?: Path) {
@@ -161,8 +166,7 @@ export class Base<T extends Objectish> implements IBase<T> {
     return produce(this.state as any, optionalRecipe, (...record) => {
       closureRecord = [...record];
     }).then((state) => {
-      this.state = state;
-      this.onCommit(closureRecord);
+      this.update(state, closureRecord);
     });
   }
 

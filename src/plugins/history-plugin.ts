@@ -1,7 +1,7 @@
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { applyPatches } from 'immer';
 
-import type { Base } from '../core/_base';
+import type { Base } from '../core/base';
 import type { PatchesTuple, PatchesTupleGroup } from '../type';
 import { bufferDebounceTime, reversePatchesTuple } from '../utils';
 
@@ -16,8 +16,6 @@ const DEFAULT_CONFIG_HISTORY: HistoryConfig = {
 };
 
 export interface HistoryPluginExt {
-  withHistory: true;
-
   roamStatus$: BehaviorSubject<[number, number]>;
 
   setHistoryConfig(config: Partial<HistoryConfig>): HistoryConfig;
@@ -46,8 +44,6 @@ export default function (cfg: Partial<HistoryConfig> = {}) {
         private historyBufferPool$ = new Subject<PatchesTuple>();
         private recordSubscription: Subscription;
 
-        public withHistory: true = true;
-
         public roamStatus$ = new BehaviorSubject<[number, number]>([0, 0]);
 
         constructor(initial: T) {
@@ -58,8 +54,8 @@ export default function (cfg: Partial<HistoryConfig> = {}) {
 
         // inherit
 
-        onCommit(record: PatchesTuple) {
-          super.onCommit(record);
+        broadcast(record: PatchesTuple) {
+          super.broadcast(record);
 
           this.historyBufferPool$.next(record);
         }

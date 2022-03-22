@@ -1,4 +1,4 @@
-import type { Base } from '../core/_base';
+import type { Base } from '../core/base';
 
 type AffairKey = number | string;
 

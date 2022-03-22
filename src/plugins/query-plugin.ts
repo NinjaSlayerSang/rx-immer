@@ -2,7 +2,7 @@ import { map, Observable } from 'rxjs';
 import type { Immutable } from 'immer';
 import { JSONPath } from 'jsonpath-plus';
 
-import type { Base } from '../core/_base';
+import type { Base } from '../core/base';
 
 export interface QueryPluginExt {
   find<V = any>(path: string): Immutable<V[]>;
