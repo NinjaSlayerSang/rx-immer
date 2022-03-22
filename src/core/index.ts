@@ -37,7 +37,7 @@ export function factory<T extends Objectish = any, E extends {} = {}>(
 export function create<T extends Objectish, E extends {} = {}>(
   initial: T,
   plugins: Plugin[] = []
-) {
+): RxImmer<T, E> {
   const instance = new (factory<T, E>(plugins))(initial);
 
   plugins.forEach((plugin) => {
