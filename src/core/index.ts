@@ -2,7 +2,12 @@ import type { Objectish, Path, Plugin } from '../type';
 import { Base, IBase } from './base';
 import { implementPluginTrait, PluginTrait } from './plugin-trait';
 import { implementSubTrait, SubTrait } from './sub-trait';
-import { PresetPluginsExt, presetPlugins } from '../plugins';
+import {
+  affairPlugin,
+  AffairPluginExt,
+  queryPlugin,
+  QueryPluginExt,
+} from '../plugins';
 
 type IPlain<T, E> = IBase<T> & PluginTrait & SubTrait & E;
 
@@ -22,6 +27,10 @@ export type RxImmer<T extends Objectish = any, E extends {} = {}> = ISub<
 export type RxImmerConstructor<T extends Objectish = any, E extends {} = {}> = {
   new (initial: T): RxImmer<T, E>;
 };
+
+export type PresetPluginsExt = QueryPluginExt & AffairPluginExt;
+
+export const presetPlugins: Plugin[] = [queryPlugin, affairPlugin];
 
 export function factory<T extends Objectish = any, E extends {} = {}>(
   plugins: Plugin[] = []
