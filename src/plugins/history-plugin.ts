@@ -1,5 +1,5 @@
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { applyPatches } from 'immer';
+import { applyPatches, Immutable } from 'immer';
 
 import type { Base } from '../core/base';
 import type { PatchesTuple, PatchesTupleGroup } from '../type';
@@ -54,8 +54,8 @@ export default function (cfg: Partial<HistoryConfig> = {}) {
 
         // inherit
 
-        broadcast(record: PatchesTuple) {
-          super.broadcast(record);
+        update(state: Immutable<T>, record: PatchesTuple) {
+          super.update(state, record);
 
           this.historyBufferPool$.next(record);
         }
@@ -119,11 +119,12 @@ export default function (cfg: Partial<HistoryConfig> = {}) {
           const records = this.history.pop();
           if (records) {
             this.recycle.push(records);
-            records.reduceRight((_, record) => {
-              this.state = applyPatches(this.state, record[1]);
-              this.patchesTuple$.next(reversePatchesTuple(record));
-              return _;
-            });
+            Array.from(records)
+              .reverse()
+              .forEach((record) => {
+                this.state = applyPatches(this.state, record[1]);
+                this.patchesTuple$.next(reversePatchesTuple(record));
+              });
           }
 
           this.onRoamStatusChange();

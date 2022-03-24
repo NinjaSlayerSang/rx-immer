@@ -8,3 +8,4 @@ export {
   default as diachronyPlugin,
 } from './diachrony-plugin';
 export { ReplayModeExt, default as replayMode } from './replay-mode';
+export { default as logPlugin } from './log-plugin';
