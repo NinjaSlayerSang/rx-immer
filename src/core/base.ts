@@ -7,7 +7,6 @@ import produce, {
   produceWithPatches,
 } from 'immer';
 import { isObjectLike } from 'lodash';
-import { JSONPath } from 'jsonpath-plus';
 
 import type { Nothing, Objectish, PatchesTuple, Path } from '../type';
 import {
@@ -22,8 +21,8 @@ import {
 
 type ValidRecipeReturnType<State> =
   | State
-  | void
   | undefined
+  | void
   | (State extends undefined ? Nothing : never);
 
 type Recipe<T> = (draft: Draft<T>) => ValidRecipeReturnType<T>;
@@ -33,12 +32,8 @@ export interface IBase<T extends Objectish> {
   value(): Immutable<T>;
   value<V = any>(path: Path): Immutable<V>;
 
-  find<V = any>(path: string): Immutable<V[]>;
-
   observe(): Observable<Immutable<T>>;
   observe<V = any>(listenPath: Path): Observable<Immutable<V>>;
-
-  query<V = any>(path: string): Observable<Immutable<V[]>>;
 
   commit(recipe: Recipe<T>): void;
   commit<V = any>(recipe: Recipe<V>, targetPath: Path): void;
@@ -62,19 +57,21 @@ export class Base<T extends Objectish> implements IBase<T> {
   }
 
   // life cycle
-  protected onCommit(record: PatchesTuple) {
+  protected update(state: Immutable<T>, record: PatchesTuple) {
+    this.state = state;
     if (isPatchesTupleValid(record)) {
-      this.patchesTuple$.next(record);
+      this.broadcast(record);
     }
   }
 
-  // implements
-  public value(path?: Path) {
-    return getByPath(this.state, path);
+  protected broadcast(record: PatchesTuple) {
+    this.patchesTuple$.next(record);
   }
 
-  public find(path: string) {
-    return JSONPath({ path, json: this.value() });
+  // implements
+
+  public value(path?: Path) {
+    return getByPath(this.state, path);
   }
 
   public observe(listenPath?: Path) {
@@ -90,10 +87,6 @@ export class Base<T extends Objectish> implements IBase<T> {
       map(() => getByPath(this.state, listenPath)),
       startWith(getByPath(this.state, listenPath))
     );
-  }
-
-  public query(path: string) {
-    return this.observe().pipe(map((json) => JSONPath({ path, json })));
   }
 
   public commit(recipe: (draft: any) => any, targetPath?: Path) {
@@ -132,8 +125,7 @@ export class Base<T extends Objectish> implements IBase<T> {
 
     const [state, ...record] = produceWithPatches(this.state, optionalRecipe);
 
-    this.state = state;
-    this.onCommit([...record]);
+    this.update(state, [...record]);
   }
 
   public commitAsync(recipe: (draft: any) => Promise<any>, targetPath?: Path) {
@@ -174,8 +166,7 @@ export class Base<T extends Objectish> implements IBase<T> {
     return produce(this.state as any, optionalRecipe, (...record) => {
       closureRecord = [...record];
     }).then((state) => {
-      this.state = state;
-      this.onCommit(closureRecord);
+      this.update(state, closureRecord);
     });
   }
 

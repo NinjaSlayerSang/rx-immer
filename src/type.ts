@@ -13,13 +13,8 @@ export type Patches = Patch[];
 export type PatchesTuple = [Patches, Patches];
 export type PatchesTupleGroup = PatchesTuple[];
 
-export interface HistoryConfig {
-  capacity: number;
-  bufferDebounce: number;
-}
-
-export interface Config {
-  history: HistoryConfig | false;
-  diachrony: boolean;
-  replay: boolean;
+export interface Plugin {
+  name: string;
+  generate?: (Class: any) => any;
+  runtime?: (instance: any) => any;
 }
