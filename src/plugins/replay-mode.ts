@@ -2,9 +2,9 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { applyPatches, castImmutable } from 'immer';
 import { range } from 'lodash';
 
+import type { Path } from '../type';
 import type { Base } from '../core/base';
 import type { Diachrony, Flow } from './diachrony-plugin';
-import type { Path } from '../type';
 import { getByPath, reversePatchesTuple } from '../utils';
 
 export interface ReplayModeExt {

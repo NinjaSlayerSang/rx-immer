@@ -1,8 +1,8 @@
 import { BehaviorSubject } from 'rxjs';
 import { applyPatches, castImmutable, Immutable } from 'immer';
 
-import type { Base } from '../core/base';
 import type { Objectish, PatchesTuple } from '../type';
+import type { Base } from '../core/base';
 
 export interface Flow {
   uid: number;

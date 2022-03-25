@@ -1,8 +1,8 @@
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { applyPatches, Immutable } from 'immer';
 
-import type { Base } from '../core/base';
 import type { PatchesTuple, PatchesTupleGroup } from '../type';
+import type { Base } from '../core/base';
 import { bufferDebounceTime, reversePatchesTuple } from '../utils';
 
 interface HistoryConfig {

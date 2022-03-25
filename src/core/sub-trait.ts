@@ -1,5 +1,5 @@
-import type { Base } from './base';
 import type { Path, TrimmedPath } from '../type';
+import type { Base } from './base';
 import { trimPath } from '../utils';
 
 export interface SubTrait {

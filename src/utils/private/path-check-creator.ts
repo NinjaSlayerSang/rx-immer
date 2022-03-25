@@ -1,6 +1,5 @@
-import { trimPath } from '../public';
-
 import type { Path, TrimmedPath } from '../../type';
+import { trimPath } from '../public';
 
 export const pathCheckerCreator = (path: Path) => (targetPath: TrimmedPath) => {
   const listenPath = trimPath(path);
