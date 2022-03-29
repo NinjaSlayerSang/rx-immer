@@ -49,7 +49,7 @@ const StoreContext = createRxImmerContext({ v: 1 });
 function Index() {
   const store = useContext(StoreContext);
   
-  const state = store.bind();
+  const state = store.useBind();
   
   return (
     <div>
@@ -188,7 +188,7 @@ rx-immer-react提供了自定义hooks更简单地绑定状态到组件的state�
 ```typescript
 const state = store.value();
 
-const c = store.value<number>('a[0].b.c'); // version >= 0.3.1
+const c = store.value<number>('a[0].b.c');
 ```
 
 `find`实例方法，接受一个*查询字符串*参数，返回在状态对象中使用JSONPath查询字符串检索出的结果集合。
