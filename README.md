@@ -45,22 +45,23 @@ import React, { useContext } from 'react';
 import { createRxImmerContext } from 'rx-immer-react';
 
 // 创建React.Context储存RxImmer状态管理实例（也可使用其他方法，如全局单例等方式初始化RxImmer实例）
-const StoreContext = createRxImmerContext({ v: 1 });
+const StoreContext = createRxImmerContext({ v: 1 }); // 实例的初始状态值(initial state)为{ v: 1 }
 
 function Index() {
   // 在组件中通过useContext获取RxImmer实例（也可使用其他方法，如通过组件props传入等方式获取实例）
   const store = useContext(StoreContext);
   
-  // 将实例的state状态与组件绑定，当实例状态发生变化，组件即会重新render
+  // 将实例(store)的状态值(state)与组件绑定，当状态发生变化，组件即会自动地重新render
   const state = store.useBind();
   
   return (
     <div>
+      {/* 使用状态值 */}
       <span>Value: {state.v}</span>
       <button onClick={() => {
-        // 修改实例状态
-        store.commit((s) => {
-          s.v++;
+        // 修改状态值
+        store.commit((draft) => {
+          draft.v += 1; // 通过直观的赋值语句修改状态值
         })
       }}>
         Add
@@ -79,7 +80,7 @@ npm install rx-immer --save
 #### 在React项目中
 
 ```bash
-npm install rx-immer-react --save
+npm install rx-immer rx-immer-react --save
 ```
 
 ### 创建实例
