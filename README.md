@@ -40,17 +40,22 @@ rx-immer具有非常简易实用的基础功能API，使用者不需要关注任
 
 Example:
 
+store.js
+
+```javascript
+import { create } from 'rx-immer-react';
+
+const store = create({ v: 1 }); // 实例的初始状态值(initial state)为 { v: 1 }
+
+export default store // 全局单例
+```
+
+index.jsx
+
 ```JSX
-import React, { useContext } from 'react';
-import { createRxImmerContext } from 'rx-immer-react';
+import store from './store';
 
-// 创建React.Context储存RxImmer状态管理实例（也可使用其他方法，如全局单例等方式初始化RxImmer实例）
-const StoreContext = createRxImmerContext({ v: 1 }); // 实例的初始状态值(initial state)为{ v: 1 }
-
-function Index() {
-  // 在组件中通过useContext获取RxImmer实例（也可使用其他方法，如通过组件props传入等方式获取实例）
-  const store = useContext(StoreContext);
-  
+export default function Index() {
   // 将实例(store)的状态值(state)与组件绑定，当状态发生变化，组件即会自动地重新render
   const state = store.useBind();
   
@@ -61,7 +66,8 @@ function Index() {
       <button onClick={() => {
         // 修改状态值
         store.commit((draft) => {
-          draft.v += 1; // 通过直观的赋值语句修改状态值
+          // 通过直观的赋值语句修改状态值
+          draft.v += 1;
         })
       }}>
         Add
