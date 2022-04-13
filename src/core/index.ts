@@ -15,8 +15,8 @@ type ISub<C, E, S = void, R = C> = {
 } & C;
 
 export type RxImmer<T extends Objectish = any, E extends {} = {}> = ISub<
-  IPlain<T, PresetPluginsExt & E>,
-  PresetPluginsExt & E
+  IPlain<T, PresetPluginsExt<T> & E>,
+  PresetPluginsExt<T> & E
 >;
 
 export type RxImmerConstructor<T extends Objectish = any, E extends {} = {}> = {
@@ -26,26 +26,17 @@ export type RxImmerConstructor<T extends Objectish = any, E extends {} = {}> = {
 export function factory<T extends Objectish = any, E extends {} = {}>(
   plugins: Plugin[] = []
 ): RxImmerConstructor<T, E> {
-  return presetPlugins
-    .concat(plugins)
-    .reduce(
-      (Cls, plugin) => plugin.generate?.(Cls) ?? Cls,
-      implementSubTrait(implementPluginTrait(Base))
-    );
+  const mergedPlugins = presetPlugins.concat(plugins);
+
+  return mergedPlugins.reduce(
+    (Cls, plugin) => plugin.generate?.(Cls) ?? Cls,
+    implementSubTrait(implementPluginTrait(Base, mergedPlugins))
+  );
 }
 
 export function create<T extends Objectish, E extends {} = {}>(
   initial: T,
   plugins: Plugin[] = []
 ): RxImmer<T, E> {
-  const instance = new (factory<T, E>(plugins))(initial);
-
-  plugins.forEach((plugin) => {
-    instance.plugins.push({
-      name: plugin.name,
-      runtime: plugin.runtime?.(instance),
-    });
-  });
-
-  return instance;
+  return new (factory<T, E>(plugins))(initial);
 }

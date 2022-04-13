@@ -1,3 +1,7 @@
+export {
+  ShortcutPluginExt,
+  default as shortcutPlugin,
+} from './shortcut-plugin';
 export { QueryPluginExt, default as queryPlugin } from './query-plugin';
 export { AffairPluginExt, default as affairPlugin } from './affair-plugin';
 export { HistoryPluginExt, default as historyPlugin } from './history-plugin';

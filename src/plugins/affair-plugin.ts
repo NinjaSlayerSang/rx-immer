@@ -1,3 +1,7 @@
+import { combineLatest, debounceTime, from, switchMap } from 'rxjs';
+
+import type { Path } from '../type';
+import type { RxImmer } from '../core';
 import type { Base } from '../core/base';
 
 type AffairKey = number | string;
@@ -78,3 +82,24 @@ export default {
     };
   },
 };
+
+export function createPromiseEffect<S extends RxImmer>(
+  effect: (params: any[]) => Promise<any>,
+  originPath: Path[],
+  targetPath: Path,
+  options?: Partial<{ denounceTime: number }>
+): Effect<S> {
+  return (self) => {
+    const subscription = combineLatest(originPath.map((op) => self.observe(op)))
+      .pipe(
+        debounceTime(options?.denounceTime ?? 0),
+        switchMap((params) => from(effect(params)))
+      )
+      .subscribe((result) => {
+        self.setValue(result, targetPath);
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
+}
