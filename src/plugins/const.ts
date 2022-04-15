@@ -8,7 +8,7 @@ import {
   ShortcutPluginExt,
 } from '.';
 
-export type PresetPluginsExt<T> = ShortcutPluginExt<T> &
+export type PresetPluginsExt = ShortcutPluginExt &
   QueryPluginExt &
   AffairPluginExt;
 

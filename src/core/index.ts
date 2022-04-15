@@ -15,8 +15,8 @@ type ISub<C, E, S = void, R = C> = {
 } & C;
 
 export type RxImmer<T extends Objectish = any, E extends {} = {}> = ISub<
-  IPlain<T, PresetPluginsExt<T> & E>,
-  PresetPluginsExt<T> & E
+  IPlain<T, PresetPluginsExt & E>,
+  PresetPluginsExt & E
 >;
 
 export type RxImmerConstructor<T extends Objectish = any, E extends {} = {}> = {
