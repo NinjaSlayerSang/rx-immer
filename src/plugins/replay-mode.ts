@@ -2,7 +2,7 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { applyPatches, castImmutable } from 'immer';
 import { range } from 'lodash';
 
-import type { Path } from '../type';
+import type { Objectish, Path } from '../type';
 import type { Base } from '../core/base';
 import type { Diachrony, Flow } from './diachrony-plugin';
 import { getByPath, reversePatchesTuple } from '../utils';
@@ -22,7 +22,7 @@ export interface ReplayModeExt {
 export default {
   name: 'replay-mode',
   generate(Cls: typeof Base): any {
-    return class<T> extends Cls<T> implements ReplayModeExt {
+    return class<T extends Objectish> extends Cls<T> implements ReplayModeExt {
       private initialTimeStamp: number;
       private terminalTimeStamp: number;
       private flows: Flow[] = [];

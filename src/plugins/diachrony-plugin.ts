@@ -29,7 +29,10 @@ export interface DiachronyPluginExt {
 export default {
   name: 'diachrony-plugin',
   generate(Cls: typeof Base): any {
-    return class<T> extends Cls<T> implements DiachronyPluginExt {
+    return class<T extends Objectish>
+      extends Cls<T>
+      implements DiachronyPluginExt
+    {
       private uuid = -1;
       private anchor: Immutable<T>;
       private anchorTimeStamp: number;

@@ -4,10 +4,12 @@ import { implementPluginTrait, PluginTrait } from './plugin-trait';
 import { implementSubTrait, SubTrait } from './sub-trait';
 import { presetPlugins, PresetPluginsExt } from '../plugins/const';
 
-type IPlain<T, E> = IBase<T> & PluginTrait & SubTrait & E;
+type IPlain<T extends Objectish, E> = IBase<T> & PluginTrait & SubTrait & E;
 
 type ISub<C, E, S = void, R = C> = {
-  sub<T = any>(relativePath: Path): ISub<IPlain<T, E>, E, ISub<C, E, S, R>, R>;
+  sub<T extends Objectish = any>(
+    relativePath: Path
+  ): ISub<IPlain<T, E>, E, ISub<C, E, S, R>, R>;
 
   sup(): S;
 

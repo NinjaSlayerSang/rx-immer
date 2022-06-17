@@ -1,6 +1,6 @@
 import { combineLatest, debounceTime, from, switchMap } from 'rxjs';
 
-import type { Path } from '../type';
+import type { Objectish, Path } from '../type';
 import type { RxImmer } from '../core';
 import type { Base } from '../core/base';
 
@@ -28,7 +28,10 @@ export interface AffairPluginExt {
 export default {
   name: 'affair-plugin',
   generate(Cls: typeof Base): any {
-    return class<T> extends Cls<T> implements AffairPluginExt {
+    return class<T extends Objectish>
+      extends Cls<T>
+      implements AffairPluginExt
+    {
       private affairs: Record<AffairKey, AffairToken<this>> = {};
       private defaultAffairKey = 0;
 

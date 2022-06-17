@@ -1,7 +1,7 @@
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { applyPatches, Immutable } from 'immer';
 
-import type { PatchesTuple, PatchesTupleGroup } from '../type';
+import type { Objectish, PatchesTuple, PatchesTupleGroup } from '../type';
 import type { Base } from '../core/base';
 import { bufferDebounceTime, reversePatchesTuple } from '../utils';
 
@@ -35,7 +35,10 @@ export default function (cfg: Partial<HistoryConfig> = {}) {
   return {
     name: 'history-plugin',
     generate(Cls: typeof Base): any {
-      return class<T> extends Cls<T> implements HistoryPluginExt {
+      return class<T extends Objectish>
+        extends Cls<T>
+        implements HistoryPluginExt
+      {
         private historyCapacity = config.capacity;
         private historyBufferDebounce = config.bufferDebounce;
 

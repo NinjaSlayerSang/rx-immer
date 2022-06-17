@@ -1,11 +1,12 @@
 import type { Subscription } from 'rxjs';
 
+import type { Objectish } from '../type';
 import type { Base } from '../core/base';
 
 export default (key: string = 'default') => ({
   name: 'log-plugin',
   generate(Cls: typeof Base): any {
-    return class<T> extends Cls<T> {
+    return class<T extends Objectish> extends Cls<T> {
       private logKey: string = key;
       private logSubscription: Subscription;
 

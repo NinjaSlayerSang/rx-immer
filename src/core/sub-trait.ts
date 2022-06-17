@@ -1,4 +1,4 @@
-import type { Path, TrimmedPath } from '../type';
+import type { Objectish, Path, TrimmedPath } from '../type';
 import type { Base } from './base';
 import { trimPath } from '../utils';
 
@@ -9,7 +9,7 @@ export interface SubTrait {
 }
 
 export function implementSubTrait(Cls: typeof Base): any {
-  return class<T> extends Cls<T> implements SubTrait {
+  return class<T extends Objectish> extends Cls<T> implements SubTrait {
     private super!: this;
 
     public path: TrimmedPath = [];

@@ -2,6 +2,7 @@ import { map, Observable } from 'rxjs';
 import type { Immutable } from 'immer';
 import { JSONPath } from 'jsonpath-plus';
 
+import type { Objectish } from '../type';
 import type { Base } from '../core/base';
 
 export interface QueryPluginExt {
@@ -13,7 +14,7 @@ export interface QueryPluginExt {
 export default {
   name: 'query-plugin',
   generate(Cls: typeof Base): any {
-    return class<T> extends Cls<T> implements QueryPluginExt {
+    return class<T extends Objectish> extends Cls<T> implements QueryPluginExt {
       public find(path: string) {
         return JSONPath({ path, json: this.value() });
       }

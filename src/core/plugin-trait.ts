@@ -1,4 +1,4 @@
-import type { Plugin } from '../type';
+import type { Objectish, Plugin } from '../type';
 import type { Base } from './base';
 
 interface PluginEntity {
@@ -13,7 +13,7 @@ export interface PluginTrait {
 }
 
 export function implementPluginTrait(Cls: typeof Base, plugins: Plugin[]): any {
-  return class<T> extends Cls<T> implements PluginTrait {
+  return class<T extends Objectish> extends Cls<T> implements PluginTrait {
     public plugins: PluginEntity[];
 
     constructor(initial: T) {
